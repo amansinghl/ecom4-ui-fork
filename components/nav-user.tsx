@@ -10,7 +10,7 @@ import {
 
 import { ChevronDown } from "lucide-react";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,16 +28,13 @@ import {
 } from "@/components/ui/sidebar";
 
 import { Button } from "./ui/button";
+import { UserType } from "@/types/user";
 
 export function NavUser({
   user,
   isLoadedOnHeader = false,
 }: {
-  user: {
-    name: string;
-    email: string;
-    avatar: string;
-  };
+  user: UserType | null;
   isLoadedOnHeader?: boolean;
 }) {
   const { isMobile } = useSidebar();
@@ -53,7 +50,9 @@ export function NavUser({
                 className="cursor-pointer flex align-middle"
               >
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">{user.name}</span>
+                  <span className="truncate font-medium">
+                    {user ? user?.first_name + " " + user?.last_name : ""}
+                  </span>
                 </div>
                 <ChevronDown className="ml-auto size-4" />
               </Button>
@@ -63,13 +62,14 @@ export function NavUser({
                 className="cursor-pointer data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
               >
                 <Avatar className="h-8 w-8 rounded-lg grayscale">
-                  <AvatarImage src={user.avatar} alt={user.name} />
-                  <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                  <AvatarImage src={user?.entity.logo} alt={user?.name} />
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">{user.name}</span>
+                  <span className="truncate font-medium">
+                    {user ? user?.first_name + " " + user?.last_name : ""}
+                  </span>
                   <span className="text-muted-foreground truncate text-xs">
-                    {user.email}
+                    {user?.email}
                   </span>
                 </div>
                 <IconDotsVertical className="ml-auto size-4" />
@@ -85,13 +85,17 @@ export function NavUser({
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarImage src={user.avatar} alt={user.name} />
-                  <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                  <AvatarImage
+                    src={user?.entity?.logo}
+                    alt={user?.entity?.entity_name}
+                  />
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">{user.name}</span>
+                  <span className="truncate font-medium">
+                    {user?.first_name + " " + user?.last_name}
+                  </span>
                   <span className="text-muted-foreground truncate text-xs">
-                    {user.email}
+                    {user?.email}
                   </span>
                 </div>
               </div>
