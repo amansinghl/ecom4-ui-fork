@@ -5,7 +5,8 @@ import { UserType } from "@/types/user";
 type UserStoreType = {
   isLoggedIn: boolean;
   user: null | UserType;
-  login: (user: UserType) => void;
+  token: string | null;
+  login: (user: UserType, token: string) => void;
   logout: () => void;
   setUser: (user: UserType) => void;
 };
@@ -13,7 +14,9 @@ type UserStoreType = {
 const useUserStore = create<UserStoreType>((set) => ({
   isLoggedIn: false,
   user: null,
-  login: (userData: UserType) => set({ isLoggedIn: true, user: userData }),
+  token: null,
+  login: (userData: UserType, token: string) =>
+    set({ isLoggedIn: true, user: userData, token }),
   logout: () => {
     set({ isLoggedIn: false, user: null });
     if (typeof window !== "undefined") {

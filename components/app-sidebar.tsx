@@ -24,7 +24,11 @@ import { Avatar, AvatarImage } from "@/components/ui/avatar";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { isLoggedIn, login, user, logout } = useUserStore();
-  verifyUserLogin(isLoggedIn, login, logout);
+
+  React.useEffect(() => {
+    verifyUserLogin(isLoggedIn, login, logout);
+  }, []);
+
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>

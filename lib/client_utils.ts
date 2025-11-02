@@ -1,7 +1,7 @@
 "use client";
 
 import { UserType } from "@/types/user";
-import { getUserDetails } from "./user";
+import { getCredits, getUserDetails } from "./user";
 
 export function getCookie(name: string) {
   if (typeof window !== "undefined") {
@@ -16,9 +16,23 @@ export function getCookie(name: string) {
   return null;
 }
 
+export async function refreshCreditBalance(
+  token: null | string,
+  user: UserType | null,
+  login: (userdata: UserType, token: string) => void,
+) {
+  if (token && user) {
+    const response = await getCredits(token);
+    user.entity.credit_balance = response?.data?.creditDetails?.credit_balance;
+    user.entity.credit_limit = response?.data?.creditDetails?.credit_limit;
+    login(user, token);
+  }
+  return "00.00";
+}
+
 export function verifyUserLogin(
   isLoggedIn: boolean,
-  login: (userData: UserType) => void,
+  login: (userData: UserType, token: string) => void,
   logout: () => void,
 ) {
   if (!isLoggedIn) {
@@ -27,7 +41,7 @@ export function verifyUserLogin(
       getUserDetails(token)
         .then((userDetails) => {
           if (userDetails?.data?.user) {
-            login(userDetails.data.user);
+            login(userDetails.data.user, token);
           } else {
             logout();
           }
