@@ -1,6 +1,7 @@
 "use client";
 
 import { IconBolt } from "@tabler/icons-react";
+import { usePathname } from "next/navigation";
 
 import {
   SidebarGroup,
@@ -9,10 +10,12 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import Link from "next/link";
 
 import { SideBarMainNavItems } from "@/types/sidebar";
 
 export function NavMain({ items }: SideBarMainNavItems) {
+  const pathname = usePathname();
   return (
     <SidebarGroup>
       <SidebarGroupContent className="flex flex-col gap-2">
@@ -30,14 +33,16 @@ export function NavMain({ items }: SideBarMainNavItems) {
         <SidebarMenu>
           {items.map((item) => (
             <SidebarMenuItem key={item.title}>
-              <SidebarMenuButton
-                isActive={item?.active ?? false}
-                className="cursor-pointer"
-                tooltip={item.title}
-              >
-                {item.icon && <item.icon />}
-                <span className="font-medium">{item.title}</span>
-              </SidebarMenuButton>
+              <Link href={item.url}>
+                <SidebarMenuButton
+                  isActive={item?.url === pathname}
+                  className="cursor-pointer"
+                  tooltip={item.title}
+                >
+                  {item.icon && <item.icon />}
+                  <span className="font-medium">{item.title}</span>
+                </SidebarMenuButton>
+              </Link>
             </SidebarMenuItem>
           ))}
         </SidebarMenu>
