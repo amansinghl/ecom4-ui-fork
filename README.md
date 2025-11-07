@@ -40,7 +40,7 @@
 
 1. Clone the repository (duh).
 2. Run `npm install` or `npm i` (for fancy people)
-3. Copy .env.example file as .env in the same location as that of .env.example file.
+3. Copy env.example file as .env in the same location as that of env.example file.
 4. Run `npm run dev` to start the server.
 5. If everything's fine the server will be started on: [http://localhost:3000/](http://localhost:3000/) or some other port if `3000` is used by some other application.
 
