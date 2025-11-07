@@ -1,7 +1,7 @@
 "use client";
 
 import { UserType } from "@/types/user";
-import { getCredits, getUserDetails } from "./user";
+import { getCredits, getUserDetails } from "@/api/user";
 
 export function getCookie(name: string) {
   if (typeof window !== "undefined") {

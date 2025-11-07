@@ -17,7 +17,7 @@ import {
 
 import useUserStore from "@/store/user";
 
-import data from "./data";
+import data from "@/components/data";
 import { verifyUserLogin } from "@/lib/client_utils";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 
