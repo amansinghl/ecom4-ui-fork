@@ -1,29 +1,9 @@
+import { getRequest } from "@/api/api-helper";
+
 export async function getUserDetails(token: string) {
-  if (token) {
-    return await (
-      await fetch("https://ecom.vamaship.com/api/v1/user", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + token,
-        },
-      })
-    ).json();
-  }
-  return false;
+  return await getRequest({ token, endpoint: "user" });
 }
 
 export async function getCredits(token: string) {
-  if (token) {
-    return await (
-      await fetch("https://ecom.vamaship.com/api/v1/transactions/credit", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + token,
-        },
-      })
-    ).json();
-  }
-  return false;
+  return await getRequest({ token, endpoint: "transactions/credit" });
 }

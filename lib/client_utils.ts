@@ -54,3 +54,25 @@ export function verifyUserLogin(
     }
   }
 }
+
+export function getQueryString(json: { [key: string]: string } | []) {
+  const params = [];
+  for (const key in json) {
+    if (Object.prototype.hasOwnProperty.call(json, key)) {
+      const value = json[key];
+      params.push(`${encodeURIComponent(key)}=${encodeURIComponent(value)}`);
+    }
+  }
+  return params.join("&");
+}
+
+export function formatQueryString(
+  queryString: string,
+): { [key: string]: string } | [] {
+  const params: { [key: string]: string } = {};
+  queryString.split("&").forEach((value: string) => {
+    const param = value.split("=");
+    params[param[0]] = param?.[1] ?? "";
+  });
+  return params;
+}
