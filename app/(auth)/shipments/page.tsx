@@ -12,7 +12,7 @@ import { PaginationType } from "@/types/shipments";
 import { decoratePagination } from "@/decorators/pagination";
 import { formatQueryString } from "@/lib/client_utils";
 
-import { usePathname } from "next/navigation";
+import { usePathname, redirect, RedirectType } from "next/navigation";
 
 const Shipments = () => {
   const params = useSearchParams();
@@ -31,6 +31,21 @@ const Shipments = () => {
   });
   const { token, logout } = useUserStore();
   const pathname = usePathname();
+
+  const changePageSize = (pageSize = 25) => {
+    if (token && pageSize !== pagination.per_page) {
+      let currentParams = window.location.search;
+      if (currentParams.includes("per_page=")) {
+        currentParams.replace(
+          "per_page=" + pagination.per_page,
+          "per_page=" + pageSize,
+        );
+      } else {
+        currentParams += "per_page=" + pageSize;
+      }
+      redirect("/shipments" + currentParams, RedirectType.push);
+    }
+  };
 
   useEffect(() => {
     if (token) {
@@ -51,7 +66,12 @@ const Shipments = () => {
     }
   }, [token, logout, params]);
   return (
-    <DataTable columns={columns} pagination={pagination} data={shipments} />
+    <DataTable
+      changePageSize={changePageSize}
+      columns={columns}
+      pagination={pagination}
+      data={shipments}
+    />
   );
 };
 

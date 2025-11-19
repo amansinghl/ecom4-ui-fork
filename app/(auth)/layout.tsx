@@ -51,7 +51,7 @@ export default function RootLayout({
             <SidebarInset>
               <SiteHeader />
               <div className="flex m-3.5">
-                <div>{children}</div>
+                <div className="w-full">{children}</div>
               </div>
             </SidebarInset>
           </SidebarProvider>
