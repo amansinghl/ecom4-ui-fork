@@ -36,13 +36,19 @@ const Shipments = () => {
     if (token && pageSize !== pagination.per_page) {
       let currentParams = window.location.search;
       if (currentParams.includes("per_page=")) {
-        currentParams.replace(
+        currentParams = currentParams.replace(
           "per_page=" + pagination.per_page,
           "per_page=" + pageSize,
         );
       } else {
         currentParams += "per_page=" + pageSize;
       }
+      console.log(
+        "ChangePageSize: ",
+        pageSize,
+        currentParams,
+        pagination.per_page,
+      );
       redirect("/shipments" + currentParams, RedirectType.push);
     }
   };

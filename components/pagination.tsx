@@ -20,9 +20,6 @@ type CustomPaginationType = {
 const CustomPagination: React.FC<CustomPaginationType> = (
   props: CustomPaginationType,
 ) => {
-  if (props?.last_page <= 1) {
-    return <></>;
-  }
   return (
     <div className="rounded-md border my-5">
       <div className="flex align-middle justify-between px-2 py-3">
