@@ -12,6 +12,7 @@ import { PaginationType } from "@/types/shipments";
 
 import { Button } from "@/components/ui/button";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
+import ShipmentsConfig from "@/configs/shipments";
 
 type CustomPaginationType = {
   changePageSize: (pageSize: number) => void;
@@ -22,12 +23,11 @@ const CustomPagination: React.FC<CustomPaginationType> = (
 ) => {
   return (
     <div className="rounded-md border my-5">
-      <div className="flex align-middle justify-between px-2 py-3">
-        <div>Jump to Page</div>
+      <div className="text-sm flex align-middle justify-end px-2 py-3">
         <div>
           <Pagination>
             <PaginationContent>
-              <div className="text-sm">
+              <div>
                 Page {props?.current_page} of {props?.last_page}
               </div>
               <div className="flex justify-center items-center gap-2.5 ml-2">
@@ -39,10 +39,15 @@ const CustomPagination: React.FC<CustomPaginationType> = (
                   value={props?.per_page}
                   className="border rounded-md px-1.5 py-1"
                 >
-                  <option value={25}>25</option>
-                  <option value={50}>50</option>
-                  <option value={100}>100</option>
-                  <option value={500}>500</option>
+                  {ShipmentsConfig.perPageShipmentsOption.map(
+                    (perPageOption) => {
+                      return (
+                        <option key={perPageOption} value={perPageOption}>
+                          {perPageOption}
+                        </option>
+                      );
+                    },
+                  )}
                 </select>
               </div>
               <PaginationItem>
