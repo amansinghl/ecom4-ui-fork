@@ -29,13 +29,15 @@ const ShipmentsRow: React.FC<React.ComponentProps<"tr">> = ({
           <b>Contact:</b>
           <div className="flex gap-1 items-center">
             {props?.data?.original?.seller_contact}{" "}
-            <Copy
-              onClick={() =>
-                copyToClipBoard(props?.data?.original?.seller_contact)
-              }
-              className="cursor-pointer"
-              size={11}
-            />
+            {props?.data?.original?.seller_contact && (
+              <Copy
+                onClick={() =>
+                  copyToClipBoard(props?.data?.original?.seller_contact)
+                }
+                className="cursor-pointer"
+                size={11}
+              />
+            )}
           </div>
         </div>
         <div className="text-xs">
@@ -53,13 +55,15 @@ const ShipmentsRow: React.FC<React.ComponentProps<"tr">> = ({
           <b>Contact:</b>
           <div className="flex gap-1 items-center">
             {props?.data?.original?.consignee_contact}{" "}
-            <Copy
-              onClick={() =>
-                copyToClipBoard(props?.data?.original?.consignee_contact)
-              }
-              className="cursor-pointer"
-              size={11}
-            />
+            {props?.data?.original?.consignee_contact && (
+              <Copy
+                onClick={() =>
+                  copyToClipBoard(props?.data?.original?.consignee_contact)
+                }
+                className="cursor-pointer"
+                size={11}
+              />
+            )}
           </div>
         </div>
         <div className="text-xs">
