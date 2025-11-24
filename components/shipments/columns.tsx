@@ -1,42 +1,33 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-import { ShipmentType } from "@/types/shipments";
-import Image from "next/image";
 
-export const columns: ColumnDef<ShipmentType>[] = [
+export const columns: ColumnDef<{ header: string }>[] = [
   {
-    accessorKey: "shipment_no",
     header: "Shipment No.",
   },
   {
-    accessorKey: "tracking_id",
-    header: "AWB Number",
+    header: "Seller",
   },
   {
-    accessorKey: "supplier_name",
-    header: "Supplier Name",
+    header: "Consignee",
   },
   {
-    accessorKey: "shipment_date",
+    header: "Locations",
+  },
+  {
+    header: "Tracking Status",
+  },
+  {
     header: "Shipment Date",
   },
   {
-    accessorKey: "from_pincode",
-    header: "Origin Pincode",
+    header: "Payment Mode",
   },
   {
-    accessorKey: "to_pincode",
-    header: "Destination Pincode",
+    header: "Product Description",
   },
   {
-    accessorKey: "partner_logo",
-    header: "Partner",
-    cell: ({ row }) => {
-      const url =
-        "https://ecom.vamaship.com/images/partners/logos/" +
-        row.original.partner_logo;
-      return <Image src={url} className="bg-amber-50 rounded-md" alt="Thumbnail" width={100} height={100} />;
-    },
+    header: "Weight",
   },
 ];

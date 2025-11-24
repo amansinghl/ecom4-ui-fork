@@ -2,6 +2,7 @@
 
 import { UserType } from "@/types/user";
 import { getCredits, getUserDetails } from "@/api/user";
+import { toast } from "sonner";
 
 export function getCookie(name: string) {
   if (typeof window !== "undefined") {
@@ -75,4 +76,17 @@ export function formatQueryString(
     params[param[0]] = param?.[1] ?? "";
   });
   return params;
+}
+
+export function copyToClipBoard(
+  textToCopy: string,
+  fieldName: string = "Text",
+) {
+  navigator.clipboard
+    .writeText(textToCopy)
+    .then(() => {
+      toast(fieldName + " copied to clipboard");
+      console.log("Copied!!!");
+    })
+    .catch((err) => console.error("Failed to copy: ", err));
 }

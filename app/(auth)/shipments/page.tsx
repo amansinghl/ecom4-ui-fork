@@ -41,7 +41,8 @@ const Shipments = () => {
           "per_page=" + pageSize,
         );
       } else {
-        currentParams += "per_page=" + pageSize;
+        const queryAppend = currentParams.includes("?") ? "&" : "?";
+        currentParams += queryAppend + "per_page=" + pageSize;
       }
       console.log(
         "ChangePageSize: ",
@@ -59,18 +60,18 @@ const Shipments = () => {
         .then((shipmentsData) => {
           if (shipmentsData?.meta?.status_code === 200) {
             setShipments(shipmentsData?.data?.shipments?.data);
-            const shipmentPagintion = decoratePagination(
+            const shipmentPagination = decoratePagination(
               shipmentsData?.data?.shipments,
               pathname,
             );
-            setPagination(shipmentPagintion);
+            setPagination(shipmentPagination);
           }
         })
         .catch(() => {
           logout();
         });
     }
-  }, [token, logout, params]);
+  }, [token, logout, params, pathname]);
   return (
     <DataTable
       changePageSize={changePageSize}

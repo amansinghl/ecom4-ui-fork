@@ -20,6 +20,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+import ShipmentsRow from "@/components/shipments/shipments-row";
+
 interface DataTableProps<TData, TValue> {
   changePageSize: (pageSize: number) => void;
   columns: ColumnDef<TData, TValue>[];
@@ -51,14 +53,14 @@ export function DataTable<TData, TValue>({
   return (
     <>
       <CustomPagination {...pagination} changePageSize={changePageSize} />
-      <div className="overflow-hidden rounded-md border">
+      <div className="overflow-scroll rounded-md border">
         <Table>
           <TableHeader className="bg-muted sticky top-0 z-10 text-center">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
                   return (
-                    <TableHead key={header.id}>
+                    <TableHead className="pl-5" key={header.id}>
                       {header.isPlaceholder
                         ? null
                         : flexRender(
@@ -73,21 +75,15 @@ export function DataTable<TData, TValue>({
           </TableHeader>
           <TableBody>
             {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext(),
-                      )}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
+              table
+                .getRowModel()
+                .rows.map((row) => (
+                  <ShipmentsRow
+                    key={row.id}
+                    data-state={row.getIsSelected() && "selected"}
+                    data={row}
+                  />
+                ))
             ) : (
               <TableRow>
                 <TableCell
