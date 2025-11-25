@@ -23,11 +23,11 @@ export function SiteHeader() {
         <h1 className="text-base font-medium hidden sm:block">Documents</h1>
         <div className="ml-auto flex gap-2 items-center">
           <div className="md:flex items-center gap-2 hidden">
-            <Button asChild>
+            {/* <Button asChild>
               <a href={external_links.support_link.url}>
                 <Headset /> Support: +91-22-48934295
               </a>
-            </Button>
+            </Button> */}
             <ModeToggle />
           </div>
           <Button

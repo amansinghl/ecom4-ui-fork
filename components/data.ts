@@ -50,6 +50,16 @@ const data = {
       title: "Shipments",
       url: "/shipments",
       icon: IconTruckDelivery,
+      items: [
+        {
+          title: "All shipments",
+          url: "/shipments",
+        },
+        {
+          title: "RTO",
+          url: "/shipments/rto",
+        },
+      ],
     },
     {
       title: "Finance",

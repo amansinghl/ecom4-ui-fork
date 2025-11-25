@@ -1,10 +1,16 @@
 import { type Icon } from "@tabler/icons-react";
 
+export type SideBarMainNavSubItem = {
+  title: string;
+  url: string;
+};
+
 export type SideBarMainNavItem = {
   title: string;
   url: string;
   icon?: Icon;
   active?: boolean;
+  items?: SideBarMainNavSubItem[];
 };
 
 export type SideBarMainNavItems = {

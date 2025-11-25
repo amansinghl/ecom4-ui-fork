@@ -21,7 +21,7 @@ const useUserStore = create<UserStoreType>((set) => ({
     set({ isLoggedIn: false, user: null });
     if (typeof window !== "undefined") {
       window.location =
-        process.env.ACCOUNTS_LOGIN_URL ??
+        process.env.NEXT_PUBLIC_ACCOUNTS_LOGIN_URL ??
         "https://accounts.vamaship.com/sign-in";
     }
   },
