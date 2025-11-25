@@ -1,7 +1,7 @@
 import { getQueryString } from "@/lib/client_utils";
 
 const base_url =
-  process.env.NEXT_PUBLIC_API_BASE_URL ?? "https://ecom.vamaship.com/api/v1/";
+  process.env.NEXT_PUBLIC_ECOM3_API_BASE_URL ?? "https://ecom.vamaship.com/api/v1/";
 
 const ui_version = process.env.NEXT_PUBLIC_UI_VERSION ?? "v2";
 
