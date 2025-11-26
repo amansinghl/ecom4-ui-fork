@@ -29,7 +29,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import Link from "next/link";
 
-import { SideBarMainNavItems } from "@/types/sidebar";
+import { SideBarMainNavItems } from "@/configs/sidebar";
 
 export function NavMain({ items }: SideBarMainNavItems) {
   const pathname = usePathname();
@@ -122,7 +122,8 @@ export function NavMain({ items }: SideBarMainNavItems) {
                               router.push(subItem.url);
                             }}
                           >
-                            {subItem.title}
+                            {subItem.icon && <subItem.icon />}
+                            <span className="font-medium">{subItem.title}</span>
                           </DropdownMenuItem>
                         ))}
                       </DropdownMenuContent>
@@ -165,6 +166,7 @@ export function NavMain({ items }: SideBarMainNavItems) {
                               isActive={subItem.url === pathname}
                             >
                               <Link href={subItem.url}>
+                                {subItem.icon && <subItem.icon className="size-4" />}
                                 <span>{subItem.title}</span>
                               </Link>
                             </SidebarMenuSubButton>

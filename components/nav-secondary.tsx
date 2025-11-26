@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { SideBarSecondaryNavItem } from "@/types/sidebar";
+import { SideBarSecondaryNavItem } from "@/configs/sidebar";
 
 import {
   SidebarGroup,

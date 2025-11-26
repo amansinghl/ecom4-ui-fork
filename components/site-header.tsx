@@ -6,7 +6,7 @@ import { ModeToggle } from "@/components/theme-toggle";
 import { NavUser } from "@/components/nav-user";
 import { Headset, Wallet, RefreshCcw } from "lucide-react";
 
-import { external_links } from "@/components/data";
+import { external_links } from "@/configs/sidebar";
 import useUserStore from "@/store/user";
 import { refreshCreditBalance } from "@/lib/client_utils";
 
