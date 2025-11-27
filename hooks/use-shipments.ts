@@ -7,6 +7,7 @@ export function useShipments(params?: Record<string, string>) {
   return useQuery({
     queryKey: ["shipments", params],
     queryFn: () => getShipments(params),
+    placeholderData: (previousData) => previousData,
   });
 }
 
