@@ -1,3 +1,4 @@
+import { getAuthToken } from "@/lib/auth";
 import useUserStore from "@/store/user";
 
 const BASE_URL = process.env.NEXT_PUBLIC_ECOM3_API_BASE_URL;
@@ -15,7 +16,7 @@ export async function apiClient<T>(
   endpoint: string,
   options: { params?: Record<string, string> } = {},
 ): Promise<T> {
-  const token = useUserStore.getState().token;
+  const token = getAuthToken();
   if (!token) throw new ApiError(401, "Not authenticated");
 
   const url = new URL(endpoint, BASE_URL);
@@ -39,4 +40,3 @@ export async function apiClient<T>(
 
   return res.json();
 }
-

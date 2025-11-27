@@ -16,17 +16,14 @@ import {
 } from "@/components/ui/sidebar";
 
 import useUserStore from "@/store/user";
+import { useUser } from "@/hooks/use-user";
 
 import data from "@/configs/sidebar";
-import { verifyUserLogin } from "@/lib/client_utils";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { isLoggedIn, login, user, logout } = useUserStore();
-
-  React.useEffect(() => {
-    verifyUserLogin(isLoggedIn, login, logout);
-  }, []);
+  const { user } = useUserStore();
+  useUser(); // Fetches user and syncs to store
 
   return (
     <Sidebar collapsible="icon" {...props}>
