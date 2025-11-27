@@ -1,6 +1,10 @@
-import { getRequest } from "@/api/api-helper";
+import { apiClient } from "@/lib/api-client";
+import { ShipmentsResponseType } from "@/types/shipments";
 
-export const getShipments = async (
-  token: string,
-  params: { [key: string]: string } | [],
-) => await getRequest({ token, endpoint: "shipments", params });
+type ShipmentsApiResponse = {
+  meta: { status_code: number };
+  data: { shipments: ShipmentsResponseType };
+};
+
+export const getShipments = (params?: Record<string, string>) =>
+  apiClient<ShipmentsApiResponse>("shipments", { params });

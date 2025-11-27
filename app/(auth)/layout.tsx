@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
+import { Providers } from "@/app/providers";
 import "@/app/globals.css";
 
 // ShadCN Components
@@ -33,13 +34,14 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <SidebarProvider
+        <Providers>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <SidebarProvider
             style={
               {
                 "--sidebar-width": "calc(var(--spacing) * 67)",
@@ -54,8 +56,9 @@ export default function RootLayout({
                 <div className="w-full">{children}</div>
               </div>
             </SidebarInset>
-          </SidebarProvider>
-        </ThemeProvider>
+            </SidebarProvider>
+          </ThemeProvider>
+        </Providers>
       </body>
     </html>
   );
