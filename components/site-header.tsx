@@ -6,12 +6,10 @@ import { ModeToggle } from "@/components/theme-toggle";
 import { NavUser } from "@/components/nav-user";
 import { Wallet, RefreshCcw } from "lucide-react";
 
-import useUserStore from "@/store/user";
 import { useUser } from "@/hooks/use-user";
 
 export function SiteHeader() {
-  const { user } = useUserStore();
-  const { refreshCredits } = useUser();
+  const { user, refreshCredits } = useUser();
 
   return (
     <header className="flex h-(--header-height) shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height)">
