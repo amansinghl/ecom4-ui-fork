@@ -55,11 +55,10 @@ function authMiddleware(req: NextRequest): NextResponse {
   return NextResponse.next();
 }
 
-export function middleware(req: NextRequest) {
+export function proxy(req: NextRequest) {
   return authMiddleware(req);
 }
 
 export const config = {
   matcher: ["/((?!_next/static|_next/image|favicon.ico|api/).*)"],
 };
-

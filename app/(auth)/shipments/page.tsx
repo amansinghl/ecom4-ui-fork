@@ -1,9 +1,27 @@
 "use client";
 
-import { useSearchParams, usePathname, redirect, RedirectType } from "next/navigation";
 import { useShipments } from "@/hooks/use-shipments";
+import {
+  flexRender,
+  getCoreRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
+import {
+  usePathname,
+  useSearchParams,
+  redirect,
+  RedirectType,
+} from "next/navigation";
 import { columns } from "@/components/shipments/columns";
-import { DataTable } from "@/components/shipments/data-table";
+import {
+  Table,
+  TableHeader,
+  TableRow,
+  TableHead,
+  TableBody,
+  TableCell,
+} from "@/components/ui/table";
+import CustomPagination from "@/components/pagination";
 import { decoratePagination } from "@/decorators/pagination";
 import { PaginationType } from "@/types/shipments";
 
@@ -28,8 +46,32 @@ export default function Shipments() {
   );
 
   const shipments = data?.data?.shipments?.data ?? [];
+
+  const table = useReactTable({
+    data: shipments,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+    manualPagination: true,
+    initialState: {
+      columnPinning: {
+        left: ["shipment_no"],
+      },
+      pagination: {
+        pageSize: 25,
+      },
+    },
+  });
+
+  if (isLoading || error) {
+    return <h1>Loading...</h1>;
+  }
+
   const rawPagination = data?.data?.shipments ?? defaultPagination;
-  const pagination = decoratePagination(rawPagination, pathname);
+  const pagination = decoratePagination(
+    rawPagination,
+    pathname,
+    params.toString(),
+  );
 
   const changePageSize = (pageSize = 25) => {
     if (pageSize !== pagination.per_page) {
@@ -47,15 +89,41 @@ export default function Shipments() {
     }
   };
 
-  if (isLoading) return <div className="p-4">Loading...</div>;
-  if (error) return <div className="p-4 text-red-500">Error loading shipments</div>;
-
   return (
-    <DataTable
-      changePageSize={changePageSize}
-      columns={columns}
-      pagination={pagination}
-      data={shipments}
-    />
+    <div>
+      <CustomPagination {...pagination} changePageSize={changePageSize} />
+      <div className="overflow-hidden rounded-md border">
+        <Table>
+          <TableHeader className="bg-muted sticky top-0 z-10">
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => (
+                  <TableHead key={header.id}>
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )}
+                  </TableHead>
+                ))}
+              </TableRow>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {table?.getRowModel()?.rows?.map((row) => (
+              <TableRow key={row.id}>
+                {row.getVisibleCells().map((cell) => (
+                  <TableCell key={cell.id}>
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+      <CustomPagination {...pagination} changePageSize={changePageSize} />
+    </div>
   );
 }

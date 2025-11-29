@@ -4,12 +4,17 @@ import { toast } from "sonner";
 
 export function copyToClipBoard(
   textToCopy: string,
-  fieldName: string = "Text",
+  fieldName: string | null = null,
 ) {
   navigator.clipboard
     .writeText(textToCopy)
     .then(() => {
-      toast(fieldName + " copied to clipboard");
+      const message = fieldName
+        ? fieldName + " copied to clipboard"
+        : "Copied to clipboard";
+      toast.success(message);
     })
-    .catch((err) => console.error("Failed to copy: ", err));
+    .catch(() => {
+      toast.error("Failed to copy!");
+    });
 }
