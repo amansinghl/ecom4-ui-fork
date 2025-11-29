@@ -1,9 +1,19 @@
-import { getRequest } from "@/api/api-helper";
+import { apiClient } from "@/lib/api-client";
+import { UserType } from "@/types/user";
 
-export async function getUserDetails(token: string) {
-  return await getRequest({ token, endpoint: "user" });
-}
+type UserResponse = {
+  data: { user: UserType };
+};
 
-export async function getCredits(token: string) {
-  return await getRequest({ token, endpoint: "transactions/credit" });
-}
+type CreditsResponse = {
+  data: {
+    creditDetails: {
+      credit_balance: string;
+      credit_limit: string;
+    };
+  };
+};
+
+export const getUser = () => apiClient<UserResponse>("user");
+
+export const getCredits = () => apiClient<CreditsResponse>("transactions/credit");

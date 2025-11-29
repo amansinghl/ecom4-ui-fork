@@ -15,21 +15,16 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 
-import useUserStore from "@/store/user";
+import { useUser } from "@/hooks/use-user";
 
 import data from "@/configs/sidebar";
-import { verifyUserLogin } from "@/lib/client_utils";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { isLoggedIn, login, user, logout } = useUserStore();
-
-  React.useEffect(() => {
-    verifyUserLogin(isLoggedIn, login, logout);
-  }, []);
+  const { user } = useUser();
 
   return (
-    <Sidebar collapsible="icon" {...props}>
+    <Sidebar className="z-50" collapsible="icon" {...props}>
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>

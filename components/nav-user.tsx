@@ -29,6 +29,7 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { UserType } from "@/types/user";
+import { handleLogout } from "@/lib/server";
 
 export function NavUser({
   user,
@@ -38,6 +39,11 @@ export function NavUser({
   isLoadedOnHeader?: boolean;
 }) {
   const { isMobile } = useSidebar();
+
+  const onLogout = async () => {
+    const { redirectTo } = await handleLogout();
+    window.location.href = redirectTo;
+  };
 
   return (
     <SidebarMenu>
@@ -116,7 +122,7 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem variant="destructive">
+            <DropdownMenuItem variant="destructive" onClick={onLogout}>
               <IconLogout />
               Log out
             </DropdownMenuItem>

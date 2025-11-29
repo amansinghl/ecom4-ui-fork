@@ -1,39 +1,80 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import useUserStore from "@/store/user";
-import { getShipments } from "@/api/shipments";
-
-import { useSearchParams } from "next/navigation";
-
+import { useShipments } from "@/hooks/use-shipments";
+import {
+  flexRender,
+  getCoreRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
+import {
+  usePathname,
+  useSearchParams,
+  redirect,
+  RedirectType,
+} from "next/navigation";
 import { columns } from "@/components/shipments/columns";
-import { DataTable } from "@/components/shipments/data-table";
-import { PaginationType } from "@/types/shipments";
+import {
+  Table,
+  TableHeader,
+  TableRow,
+  TableHead,
+  TableBody,
+  TableCell,
+} from "@/components/ui/table";
+import CustomPagination from "@/components/pagination";
 import { decoratePagination } from "@/decorators/pagination";
-import { formatQueryString } from "@/lib/client_utils";
+import { PaginationType } from "@/types/shipments";
 
-import { usePathname, redirect, RedirectType } from "next/navigation";
+const defaultPagination: PaginationType = {
+  first_page_url: null,
+  prev_page_url: null,
+  next_page_url: "",
+  last_page_url: "",
+  current_page: 1,
+  from: 1,
+  to: 1,
+  last_page: 1,
+  per_page: 25,
+  total: 1,
+};
 
-const Shipments = () => {
+export default function Shipments() {
   const params = useSearchParams();
-  const [shipments, setShipments] = useState([]);
-  const [pagination, setPagination] = useState<PaginationType>({
-    first_page_url: null,
-    prev_page_url: null,
-    next_page_url: "",
-    last_page_url: "",
-    current_page: 1,
-    from: 1,
-    to: 1,
-    last_page: 1,
-    per_page: 25,
-    total: 1,
-  });
-  const { token, logout } = useUserStore();
   const pathname = usePathname();
+  const { data, isLoading, error } = useShipments(
+    Object.fromEntries(params.entries()),
+  );
+
+  const shipments = data?.data?.shipments?.data ?? [];
+
+  const table = useReactTable({
+    data: shipments,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+    manualPagination: true,
+    initialState: {
+      columnPinning: {
+        left: ["shipment_no"],
+      },
+      pagination: {
+        pageSize: 25,
+      },
+    },
+  });
+
+  if (isLoading || error) {
+    return <h1>Loading...</h1>;
+  }
+
+  const rawPagination = data?.data?.shipments ?? defaultPagination;
+  const pagination = decoratePagination(
+    rawPagination,
+    pathname,
+    params.toString(),
+  );
 
   const changePageSize = (pageSize = 25) => {
-    if (token && pageSize !== pagination.per_page) {
+    if (pageSize !== pagination.per_page) {
       let currentParams = window.location.search;
       if (currentParams.includes("per_page=")) {
         currentParams = currentParams.replace(
@@ -44,42 +85,45 @@ const Shipments = () => {
         const queryAppend = currentParams.includes("?") ? "&" : "?";
         currentParams += queryAppend + "per_page=" + pageSize;
       }
-      console.log(
-        "ChangePageSize: ",
-        pageSize,
-        currentParams,
-        pagination.per_page,
-      );
       redirect("/shipments" + currentParams, RedirectType.push);
     }
   };
 
-  useEffect(() => {
-    if (token) {
-      getShipments(token, formatQueryString(params ? "" + params : ""))
-        .then((shipmentsData) => {
-          if (shipmentsData?.meta?.status_code === 200) {
-            setShipments(shipmentsData?.data?.shipments?.data);
-            const shipmentPagination = decoratePagination(
-              shipmentsData?.data?.shipments,
-              pathname,
-            );
-            setPagination(shipmentPagination);
-          }
-        })
-        .catch(() => {
-          logout();
-        });
-    }
-  }, [token, logout, params, pathname]);
   return (
-    <DataTable
-      changePageSize={changePageSize}
-      columns={columns}
-      pagination={pagination}
-      data={shipments}
-    />
+    <div>
+      <CustomPagination {...pagination} changePageSize={changePageSize} />
+      <div className="overflow-hidden rounded-md border">
+        <Table>
+          <TableHeader className="bg-muted sticky top-0 z-10">
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => (
+                  <TableHead key={header.id}>
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )}
+                  </TableHead>
+                ))}
+              </TableRow>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {table?.getRowModel()?.rows?.map((row) => (
+              <TableRow key={row.id}>
+                {row.getVisibleCells().map((cell) => (
+                  <TableCell key={cell.id}>
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+      <CustomPagination {...pagination} changePageSize={changePageSize} />
+    </div>
   );
-};
-
-export default Shipments;
+}

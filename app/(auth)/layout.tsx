@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
+import { Providers } from "@/app/providers";
+import { Toaster } from "@/components/ui/sonner";
 import "@/app/globals.css";
 
 // ShadCN Components
@@ -33,29 +35,32 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <SidebarProvider
-            style={
-              {
-                "--sidebar-width": "calc(var(--spacing) * 67)",
-                "--header-height": "calc(var(--spacing) * 12)",
-              } as React.CSSProperties
-            }
+        <Providers>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
           >
-            <AppSidebar variant="floating" />
-            <SidebarInset>
-              <SiteHeader />
-              <div className="flex m-3.5">
-                <div className="w-full">{children}</div>
-              </div>
-            </SidebarInset>
-          </SidebarProvider>
-        </ThemeProvider>
+            <SidebarProvider
+              style={
+                {
+                  "--sidebar-width": "calc(var(--spacing) * 67)",
+                  "--header-height": "calc(var(--spacing) * 12)",
+                } as React.CSSProperties
+              }
+            >
+              <AppSidebar variant="floating" />
+              <SidebarInset>
+                <SiteHeader />
+                <div className="flex m-3.5">
+                  <div className="w-full">{children}</div>
+                </div>
+                <Toaster />
+              </SidebarInset>
+            </SidebarProvider>
+          </ThemeProvider>
+        </Providers>
       </body>
     </html>
   );
