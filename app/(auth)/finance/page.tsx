@@ -46,7 +46,6 @@ export default function Finance() {
   const params = useSearchParams();
   const pathname = usePathname();
   
-  // Build full queryParams for default cod transactions table filters and sorting
   const queryParams = {
     sort: "shipment_no|desc",
     page: "1",
