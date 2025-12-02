@@ -21,7 +21,6 @@ import {
   Package,
   Box,
   CreditCard,
-  Weight,
 } from "lucide-react";
 import { copyToClipBoard } from "@/lib/client_utils";
 import { Avatar, AvatarFallback } from "../ui/avatar";
@@ -243,13 +242,40 @@ export const columns: ColumnDef<ShipmentType>[] = [
 
       return (
         <div className="space-y-1">
-          <Badge variant="outline" className="text-xs">
+          <Badge variant="outline" className="text-xs max-w-36 text-ellipsis">
             <Package className="mr-1 size-3" />
             {row.original.product || "Unknown"}
           </Badge>
           {/* <div className={`text-xs font-medium ${paymentColor}`}>
             {paymentMode}
           </div> */}
+        </div>
+      );
+    },
+    enableSorting: false,
+  },
+  {
+    accessorKey: "payment_modes",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Payment Mode" />
+    ),
+    cell: ({ row }) => {
+      const isCod = Number(row?.original?.cod_value ?? "0") > 0;
+      return (
+        <div className="flex flex-col">
+          <div className="flex gap-1 items-center">
+            {isCod ? (
+              <Box color="purple" size={16} />
+            ) : (
+              <CreditCard color="green" size={16} />
+            )}
+            {isCod ? "COD" : "Prepaid"}
+          </div>
+          {isCod && (
+            <div className="text-muted-foreground text-xs font-bold">
+              Amt: {row?.original?.cod_value || "0.0"}
+            </div>
+          )}
         </div>
       );
     },
@@ -308,50 +334,6 @@ export const columns: ColumnDef<ShipmentType>[] = [
     cell: ({ row }) => (
       <div className="text-sm font-semibold text-green-600">
         {row.original.total_price || "N/A"}
-      </div>
-    ),
-    enableSorting: false,
-  },
-  {
-    accessorKey: "payment_modes",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Payment Mode" />
-    ),
-    cell: ({ row }) => {
-      const isCod = Number(row?.original?.cod_value ?? "0") > 0;
-      return (
-        <div className="flex flex-col">
-          <div className="flex gap-1 items-center">
-            {isCod ? (
-              <Box color="purple" size={16} />
-            ) : (
-              <CreditCard color="green" size={16} />
-            )}
-            {isCod ? "COD" : "Prepaid"}
-          </div>
-          {isCod && (
-            <div className="text-muted-foreground text-xs font-bold">
-              Amt: {row?.original?.cod_value || "0.0"}
-            </div>
-          )}
-        </div>
-      );
-    },
-    enableSorting: false,
-  },
-  {
-    accessorKey: "weight",
-    header: ({ column }) => (
-      <DataTableColumnHeader
-        className="text-center"
-        column={column}
-        title="Weight"
-      />
-    ),
-    cell: ({ row }) => (
-      <div className="flex gap-1 align-middle justify-center items-center">
-        <Weight size={16} />
-        {row?.original?.weight} Kg
       </div>
     ),
     enableSorting: false,

@@ -10,4 +10,3 @@ export function useShipments(params?: Record<string, string>) {
     placeholderData: (previousData) => previousData,
   });
 }
-

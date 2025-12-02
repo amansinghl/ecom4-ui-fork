@@ -45,7 +45,7 @@ export default function Shipments() {
     Object.fromEntries(params.entries()),
   );
 
-  const shipments = data?.data?.shipments?.data ?? [];
+  const shipments = data?.shipments?.data ?? [];
 
   const table = useReactTable({
     data: shipments,
@@ -66,7 +66,7 @@ export default function Shipments() {
     return <h1>Loading...</h1>;
   }
 
-  const rawPagination = data?.data?.shipments ?? defaultPagination;
+  const rawPagination = data?.shipments ?? defaultPagination;
   const pagination = decoratePagination(
     rawPagination,
     pathname,

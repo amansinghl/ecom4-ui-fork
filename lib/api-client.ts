@@ -73,5 +73,5 @@ export async function apiClient<T>(
     throw new ApiError(res.status, `API error: ${res.status}`);
   }
 
-  return res.json();
+  return (await res.json())?.data;
 }
