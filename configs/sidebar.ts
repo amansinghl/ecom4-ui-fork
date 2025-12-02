@@ -1,38 +1,35 @@
 import {
-  IconHelp,
-  IconCashBanknote,
-  IconUserDollar,
-  IconDashboard,
-  IconTruckDelivery,
-  type Icon,
-} from "@tabler/icons-react";
-
-import {
-  Package,
-  Weight,
-  Settings,
-  User,
+  LayoutDashboard,
+  ShoppingCart,
+  Truck,
+  DollarSign,
+  Scale,
+  Database,
+  Plug,
+  UserCog,
+  Users,
+  HelpCircle,
+  PlayCircle,
   Headset,
-  TvMinimalPlay,
   BoxesIcon,
-  ListTodoIcon,
   PackageCheckIcon,
   MapPinHouseIcon,
   Activity,
   Package2,
-  Box,
+  Layers,
+  type LucideIcon,
 } from "lucide-react";
 
 export type SideBarMainNavSubItem = {
   title: string;
   url: string;
-  icon?: Icon;
+  icon?: LucideIcon;
 };
 
 export type SideBarMainNavItem = {
   title: string;
   url: string;
-  icon?: Icon;
+  icon?: LucideIcon;
   active?: boolean;
   items?: SideBarMainNavSubItem[];
 };
@@ -44,7 +41,7 @@ export type SideBarMainNavItems = {
 export type SideBarSecondaryNavItem = {
   title: string;
   url: string;
-  icon: Icon;
+  icon: LucideIcon;
   external?: boolean;
   new_tab?: boolean;
 };
@@ -76,39 +73,41 @@ const data = {
   navMain: [
     {
       title: "Dashboard",
-      url: "/",
-      icon: IconDashboard,
+      url: "/", 
+      icon: LayoutDashboard,
     },
     {
       title: "Orders",
       url: "/orders",
-      icon: Package,
+      icon: ShoppingCart,
+      items: [
+          { title: "Manage Orders", url: "/orders", icon: Package2 },
+          { title: "Bulk", url: "/orders/bulk", icon: Layers },
+        ],
     },
     {
       title: "Shipments",
       url: "/shipments",
-      icon: IconTruckDelivery,
+      icon: Truck,
       items: [
         { title: "All Shipments", url: "/shipments", icon: Activity },
         { title: "RTO", url: "/shipments/rto", icon: Package2 },
-        { title: "Undelivered", url: "/shipments/undelivered", icon: Activity },
-        { title: "Pickup", url: "/shipments/pickup", icon: Box },
       ],
     },
     {
       title: "Finance",
-      url: "#",
-      icon: IconCashBanknote,
+      url: "/finance",
+      icon: DollarSign,
     },
     {
       title: "Weights",
-      url: "#",
-      icon: Weight,
+      url: "/weights",
+      icon: Scale,
     },
     {
       title: "Catalogs",
       url: "/catalogs",
-      icon: ListTodoIcon,
+      icon: Database,
       items: [
         { title: "Address Book", url: "/catalogs/address-book", icon: MapPinHouseIcon },
         { title: "Products", url: "/catalogs/products", icon: BoxesIcon },
@@ -116,33 +115,34 @@ const data = {
       ],
     },
     {
-      title: "Settings",
-      url: "#",
-      icon: Settings,
+      title: "Integrations",
+      url: "/integrations",
+      icon: Plug,
+      nonCollapsible: true,
     },
     {
       title: "Personalize",
       url: "#",
-      icon: User,
+      icon: UserCog,
     },
     {
       title: "Ambassador",
       url: "#",
-      icon: IconUserDollar,
+      icon: Users,
     },
   ],
   navSecondary: [
     {
       title: "Knowledge base",
       url: external_links.knowledge_base_link.url,
-      icon: IconHelp,
+      icon: HelpCircle,
       external: true,
       new_tab: true,
     },
     {
       title: "Video Guides",
       url: external_links.video_guides_link.url,
-      icon: TvMinimalPlay,
+      icon: PlayCircle,
       external: true,
       new_tab: true,
     },
