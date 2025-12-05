@@ -18,6 +18,7 @@ import {
   Package2,
   Layers,
   type LucideIcon,
+  FileText,
 } from "lucide-react";
 
 export type SideBarMainNavSubItem = {
@@ -124,6 +125,9 @@ const data = {
       title: "Personalize",
       url: "#",
       icon: UserCog,
+      items: [
+        {title: "Printables", url: "/personalize/printables", icon: FileText}
+      ],
     },
     {
       title: "Ambassador",
