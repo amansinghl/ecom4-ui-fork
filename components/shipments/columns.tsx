@@ -25,6 +25,7 @@ import {
 import { copyToClipBoard } from "@/lib/client_utils";
 import { Avatar, AvatarFallback } from "../ui/avatar";
 import { Badge } from "../ui/badge";
+import Link from "next/link";
 
 const getStatusIcon = (status: string | undefined) => {
   if (!status) return <Clock className="size-4 text-gray-600" />;
@@ -76,9 +77,12 @@ export const columns: ColumnDef<ShipmentType>[] = [
           <Tooltip>
             <TooltipTrigger asChild>
               <div className="group hover:bg-muted/50 cursor-pointer space-y-1 rounded-md p-2 transition-colors">
-                <div className="text-primary group-hover:text-primary/80 font-mono text-sm font-semibold transition-colors">
+                <Link
+                  href={row?.original?.shipment_no ? `/shipments/${row.original.shipment_no}` : "#"}
+                  className="text-primary group-hover:text-primary/80 font-mono text-sm font-semibold transition-colors"
+                >
                   {row.original.shipment_no || "N/A"}
-                </div>
+                </Link>
                 <div className="text-muted-foreground flex items-center gap-2 text-xs">
                   <span className="font-mono">
                     {row.original.tracking_id || "N/A"}
