@@ -14,9 +14,6 @@ import {
   Phone,
   MapPin,
   Truck,
-  Clock,
-  CheckCircle,
-  AlertCircle,
   Calendar,
   Package,
   Box,
@@ -26,44 +23,7 @@ import { copyToClipBoard } from "@/lib/client_utils";
 import { Avatar, AvatarFallback } from "../ui/avatar";
 import { Badge } from "../ui/badge";
 import Link from "next/link";
-
-const getStatusIcon = (status: string | undefined) => {
-  if (!status) return <Clock className="size-4 text-gray-600" />;
-
-  switch (status.toLowerCase()) {
-    case "delivered":
-      return <CheckCircle className="size-4 text-green-600" />;
-    case "in transit":
-      return <Truck className="size-4 text-blue-600" />;
-    case "processing":
-      return <Clock className="size-4 text-yellow-600" />;
-    case "delayed":
-      return <AlertCircle className="size-4 text-red-600" />;
-    default:
-      return <Clock className="size-4 text-gray-600" />;
-  }
-};
-
-const getStatusVariant = (status: string | undefined) => {
-  if (!status) return "outline";
-
-  switch (status.toLowerCase()) {
-    case "delivered":
-      return "default";
-    case "in transit":
-      return "secondary";
-    case "processing":
-      return "outline";
-    case "delayed":
-      return "destructive";
-    default:
-      return "outline";
-  }
-};
-
-const getPaymentModeColor = (isCod: boolean) => {
-  return isCod ? "text-blue-600" : "text-green-600";
-};
+import { getPaymentModeColor, getStatusIcon, getStatusVariant } from "./utils";
 
 export const columns: ColumnDef<ShipmentType>[] = [
   {
@@ -78,7 +38,11 @@ export const columns: ColumnDef<ShipmentType>[] = [
             <TooltipTrigger asChild>
               <div className="group hover:bg-muted/50 cursor-pointer space-y-1 rounded-md p-2 transition-colors">
                 <Link
-                  href={row?.original?.shipment_no ? `/shipments/${row.original.shipment_no}` : "#"}
+                  href={
+                    row?.original?.shipment_no
+                      ? `/shipments/${row.original.shipment_no}`
+                      : "#"
+                  }
                   className="text-primary group-hover:text-primary/80 font-mono text-sm font-semibold transition-colors"
                 >
                   {row.original.shipment_no || "N/A"}

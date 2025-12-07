@@ -1,78 +1,81 @@
+export type ShipmentDetailsType = {
+  id: number;
+  accounts_user_id: number;
+  accounts_entity_id: number;
+  shipment_no: number;
+  email: string;
+  supplier_id: number;
+  from_pincode: string;
+  to_pincode: string;
+  shipment_date: string;
+  product_code: string;
+  cod_value: string;
+  solution?: string | null;
+  pre_gst_total_price: string;
+  total_price: string;
+  pre_gst_total_partner_cost: string;
+  total_partner_cost: string;
+  product: string;
+  product_value: string;
+  cancelled_at: string;
+  bulk_id: string;
+  tracking_id: string;
+  booking_status: number;
+  lr_num: string | null;
+  rto_tracking_id: string | null;
+  tracking_status: number;
+  is_offline: number;
+  invoice_weight: number;
+  billable: string;
+  partner_bill: number;
+  ecom2_bulk_reference_number: string | null;
+  reference1: string;
+  reference2: string;
+  branch_id: string | null;
+  shipment_input_id: number;
+  pickup_location_id: number;
+  consignee_location_id: number;
+  billing_location_id: number;
+  return_location_id: number;
+  channel_id: string;
+  created_at: string;
+  updated_at: string;
+  deleted_at: string | null;
+  shipment_zone: string;
+  slab_count: number;
+  billed_price: string;
+  supplier_cost: string;
+  calculated: number;
+  multipartner: number;
+  ip_address: string;
+  booking_medium: string;
+  created_at_ist: string;
+  is_entity_spoc: number;
+  is_stressed: number;
+  awb_no: string;
+  rto_awb_no: string | null;
+  mode_transport: string;
+  shipment_type: string;
+  cargo_type: string;
+  service_type: string;
+  payment_type: string;
+  booking_channel: string;
+  partner_name: string;
+  partner_logo: string;
+  switched_partner_id: strig | null;
+  shipment_cost: string;
+  shipment_created_at: string;
+  entity_name: string;
+  invoice_date: string | null;
+  tracking_category: string;
+  quantity: number;
+  debit_credit_difference: string;
+  pickup_id: string | null;
+  picked_up: false;
+};
+
 export type ShipmentDetailsAPIResponseType = {
-  details: {
-    id: number;
-    accounts_user_id: number;
-    accounts_entity_id: number;
-    shipment_no: number;
-    email: string;
-    supplier_id: number;
-    from_pincode: string;
-    to_pincode: string;
-    shipment_date: string;
-    product_code: string;
-    cod_value: string;
-    pre_gst_total_price: string;
-    total_price: string;
-    pre_gst_total_partner_cost: string;
-    total_partner_cost: string;
-    product: string;
-    product_value: string;
-    cancelled_at: string;
-    bulk_id: string;
-    tracking_id: string;
-    booking_status: number;
-    lr_num: string | null;
-    rto_tracking_id: string | null;
-    tracking_status: number;
-    is_offline: number;
-    invoice_weight: number;
-    billable: string;
-    partner_bill: number;
-    ecom2_bulk_reference_number: string | null;
-    reference1: string;
-    reference2: string;
-    branch_id: string | null;
-    shipment_input_id: number;
-    pickup_location_id: number;
-    consignee_location_id: number;
-    billing_location_id: number;
-    return_location_id: number;
-    channel_id: string;
-    created_at: string;
-    updated_at: string;
-    deleted_at: string | null;
-    shipment_zone: string;
-    slab_count: number;
-    billed_price: string;
-    supplier_cost: string;
-    calculated: number;
-    multipartner: number;
-    ip_address: string;
-    booking_medium: string;
-    created_at_ist: string;
-    is_entity_spoc: number;
-    is_stressed: number;
-    awb_no: string;
-    rto_awb_no: string | null;
-    mode_transport: string;
-    shipment_type: string;
-    cargo_type: string;
-    service_type: string;
-    payment_type: string;
-    booking_channel: string;
-    partner_name: string;
-    partner_logo: string;
-    switched_partner_id: strig | null;
-    shipment_cost: string;
-    shipment_created_at: string;
-    entity_name: string;
-    invoice_date: string | null;
-    tracking_category: string;
-    quantity: number;
-    debit_credit_difference: string;
-    pickup_id: string | null;
-    picked_up: false;
-  };
+  details: ShipmentDetailsType;
 };
 
 export type ShipmentTrackingAdditionalDetailsType = {
@@ -138,19 +141,22 @@ export type ShipmentNotificationsAPIResponseType = {
 };
 
 export type ShipmentCostBreakupChargeHeadType = {
-  total_without_tax?: string | null;
-  total_amount?: string | null;
-  cgst?: string | null;
-  igst?: string | null;
-  sgst?: string | null;
-  gst?: string | null;
-  total_gst?: string | null;
+  total_without_tax?: string | number | null;
+  total_amount?: string | number | null;
+  cgst?: string | number | null;
+  igst?: string | number | null;
+  sgst?: string | number | null;
+  gst?: string | number | null;
+  total_gst?: string | number | null;
   charge_head?: string | null;
   created_at?: string | null;
 };
 
 export type ShipmentCostBreakupAPIResponseType = {
-  cost_breakup: Array<ShipmentCostBreakupChargeHeadType> | number;
+  cost_breakup: {
+    0: Array<ShipmentCostBreakupChargeHeadType>;
+    1: number;
+  };
 };
 
 export type ShipmentTransactionType = {
@@ -208,14 +214,16 @@ export type ShipmentAddressType = {
   country_code: string | null;
 };
 
+export type ShipmentAddressesType = {
+  origin_address: ShipmentAddressType;
+  destination_address: ShipmentAddressType;
+  billing_address: ShipmentAddressType;
+  return_address: ShipmentAddressType;
+  return_address: ShipmentAddressType;
+};
+
 export type ShipmentAddressesAPIResponseType = {
-  address: {
-    origin_address: ShipmentAddressType;
-    destination_address: ShipmentAddressType;
-    billing_address: ShipmentAddressType;
-    return_address: ShipmentAddressType;
-    return_address: ShipmentAddressType;
-  };
+  address: ShipmentAddressesType;
 };
 
 export type ShipmentPackageType = {
@@ -235,7 +243,7 @@ export type ShipmentPackageType = {
 };
 
 export type ShipmentPackageDetailsAPIResponseType = {
-  package_details: Array<ShipmentPackageType> | null;
+  package_details: Array<ShipmentPackageType>;
 };
 
 export type ShipmentNDRLinkType = {
