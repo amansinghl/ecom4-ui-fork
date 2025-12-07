@@ -57,10 +57,14 @@ const CustomPagination: React.FC<CustomPaginationType> = (
   const jumpToPage = (pageNumber: number) => {
     if (pageNumber > 0 && pageNumber <= props?.last_page) {
       let currentParams = window.location.search;
-      if (currentParams.includes("page=")) {
+      if (
+        currentParams.includes("?page=") ||
+        currentParams.includes("&page=")
+      ) {
+        const queryAppend = currentParams.includes("?page=") ? "?" : "&";
         currentParams = currentParams.replace(
-          "page=" + props.current_page,
-          "page=" + pageNumber,
+          `${queryAppend}page=${props.current_page}`,
+          `${queryAppend}page=${pageNumber}`,
         );
       } else {
         const queryAppend = currentParams.includes("?") ? "&" : "?";
