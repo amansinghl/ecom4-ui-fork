@@ -1,5 +1,6 @@
 "use client";
 
+import { Params } from "next/dist/server/request/params";
 import { toast } from "sonner";
 
 export function copyToClipBoard(
@@ -17,4 +18,17 @@ export function copyToClipBoard(
     .catch(() => {
       toast.error("Failed to copy!");
     });
+}
+
+export function getPageHeaderWithPathName(pathName: string, params: Params) {
+  pathName = pathName.replace("/", "");
+  const pathMapping: { [key: string]: string } = {
+    shipments: "Shipments",
+    "shipments/rto": "RTO Shipments",
+  };
+  if (pathMapping?.[pathName]) {
+    return pathMapping?.[pathName];
+  }
+  pathName = pathName.split("/")[0];
+  return pathMapping?.[pathName] ?? "Unknown";
 }

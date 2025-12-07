@@ -1,6 +1,6 @@
 "use client";
 
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useCompleteShipmentDetails } from "@/hooks/use-shipment-details";
 import ShipmentDetails from "@/components/shipments/shipment/Details";
 import ShipmentAddresses from "@/components/shipments/shipment/Addresses";
@@ -14,17 +14,20 @@ import { copyToClipBoard } from "@/lib/client_utils";
 export default function BlogPostPage() {
   const params = useParams();
   const router = useRouter();
+  const queryParams = useSearchParams();
 
   const { shipmentNo = "default" } = params;
+  const shouldShowBackToShipments = queryParams.get("share") ? false : true;
   const shipmentDetails = useCompleteShipmentDetails(shipmentNo.toString());
 
   const share = () => {
-    copyToClipBoard(window?.location?.href);
+    copyToClipBoard(`${window?.location?.href}?share=true`);
   };
-
   return (
     <div>
-      <Button onClick={() => router.back()}>Go Back to Shipments</Button>
+      {shouldShowBackToShipments && (
+        <Button onClick={() => router.back()}>Go Back to Shipments</Button>
+      )}
       <ShipmentDetails
         shipmentData={shipmentDetails?.shipment_details?.data?.details}
         share={share}

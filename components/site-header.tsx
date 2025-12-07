@@ -7,8 +7,12 @@ import { NavUser } from "@/components/nav-user";
 import { Wallet, RefreshCcw } from "lucide-react";
 
 import { useUser } from "@/hooks/use-user";
+import { useParams, usePathname } from "next/navigation";
+import { getPageHeaderWithPathName } from "@/lib/client_utils";
 
 export function SiteHeader() {
+  const pathName = usePathname();
+  const params = useParams();
   const { user, refreshCredits } = useUser();
 
   return (
@@ -19,7 +23,9 @@ export function SiteHeader() {
           orientation="vertical"
           className="mx-2 data-[orientation=vertical]:h-4"
         />
-        <h1 className="text-base font-medium hidden sm:block">Documents</h1>
+        <h1 className="text-base font-medium hidden sm:block">
+          {getPageHeaderWithPathName(pathName, params)}
+        </h1>
         <div className="ml-auto flex gap-2 items-center">
           <div className="md:flex items-center gap-2 hidden">
             <ModeToggle />
