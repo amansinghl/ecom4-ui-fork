@@ -78,14 +78,6 @@ export default function BlogPostPage() {
           />
         </div>
       </div>
-      {/*<div>
-        <Card>
-          <CardHeader>
-            <CardTitle>Shipment Details</CardTitle>
-          </CardHeader>
-          <CardContent>{JSON.stringify(shipmentDetails)}</CardContent>
-        </Card>
-      </div>*/}
     </div>
   );
 }

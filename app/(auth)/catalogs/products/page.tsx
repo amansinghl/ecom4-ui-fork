@@ -51,7 +51,9 @@ export default function Products() {
 
   const products = data?.data?.products?.data ?? [];
   const [rowSelection, setRowSelection] = useState({});
-  const [selectedProduct, setSelectedProduct] = useState<ProductType | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<ProductType | null>(
+    null,
+  );
 
   const handleEdit = (product: ProductType) => {
     setSelectedProduct(product);
@@ -107,22 +109,6 @@ export default function Products() {
     params.toString(),
   );
 
-  const changePageSize = (pageSize = 25) => {
-    if (pageSize !== pagination.per_page) {
-      let currentParams = window.location.search;
-      if (currentParams.includes("per_page=")) {
-        currentParams = currentParams.replace(
-          "per_page=" + pagination.per_page,
-          "per_page=" + pageSize,
-        );
-      } else {
-        const queryAppend = currentParams.includes("?") ? "&" : "?";
-        currentParams += queryAppend + "per_page=" + pageSize;
-      }
-      redirect("/catalogs/products" + currentParams, RedirectType.push);
-    }
-  };
-
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -138,7 +124,7 @@ export default function Products() {
         </Button>
       </div>
 
-      <CustomPagination {...pagination} changePageSize={changePageSize} />
+      <CustomPagination {...pagination} endpoint="/catalogs/products" />
       <div className="overflow-hidden rounded-md border">
         <Table>
           <TableHeader className="bg-muted sticky top-0 z-10">
@@ -173,7 +159,7 @@ export default function Products() {
           </TableBody>
         </Table>
       </div>
-      <CustomPagination {...pagination} changePageSize={changePageSize} />
+      <CustomPagination {...pagination} endpoint="/catalogs/products" />
     </div>
   );
 }

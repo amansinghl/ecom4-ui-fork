@@ -43,7 +43,7 @@ const defaultPagination: PaginationType = {
 export default function Weights() {
   const params = useSearchParams();
   const pathname = usePathname();
-  
+
   // Build queryParams with defaults
   const queryParams = {
     sort: "shipment_no|desc",
@@ -51,7 +51,7 @@ export default function Weights() {
     per_page: "25",
     ...Object.fromEntries(params.entries()),
   };
-  
+
   const { data, isLoading, error } = useWeights(queryParams);
 
   const disputes = data?.data?.disputable?.data ?? [];
@@ -88,22 +88,6 @@ export default function Weights() {
     params.toString(),
   );
 
-  const changePageSize = (pageSize = 25) => {
-    if (pageSize !== pagination.per_page) {
-      let currentParams = window.location.search;
-      if (currentParams.includes("per_page=")) {
-        currentParams = currentParams.replace(
-          "per_page=" + pagination.per_page,
-          "per_page=" + pageSize,
-        );
-      } else {
-        const queryAppend = currentParams.includes("?") ? "&" : "?";
-        currentParams += queryAppend + "per_page=" + pageSize;
-      }
-      redirect("/weights" + currentParams, RedirectType.push);
-    }
-  };
-
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -115,7 +99,7 @@ export default function Weights() {
         </div>
       </div>
 
-      <CustomPagination {...pagination} changePageSize={changePageSize} />
+      <CustomPagination {...pagination} endpoint="/weights" />
       <div className="overflow-hidden rounded-md border">
         <Table>
           <TableHeader className="bg-muted sticky top-0 z-10">
@@ -150,7 +134,7 @@ export default function Weights() {
           </TableBody>
         </Table>
       </div>
-      <CustomPagination {...pagination} changePageSize={changePageSize} />
+      <CustomPagination {...pagination} endpoint="/weights" />
     </div>
   );
 }

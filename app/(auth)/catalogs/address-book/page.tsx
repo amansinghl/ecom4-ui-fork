@@ -53,7 +53,9 @@ export default function AddressBook() {
   const locations = data?.data?.locations?.data ?? [];
   const [rowSelection, setRowSelection] = useState({});
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [selectedLocation, setSelectedLocation] = useState<LocationType | null>(null);
+  const [selectedLocation, setSelectedLocation] = useState<LocationType | null>(
+    null,
+  );
 
   const handleEdit = (location: LocationType) => {
     setSelectedLocation(location);
@@ -62,7 +64,9 @@ export default function AddressBook() {
 
   // TODO
   const handleDelete = (location: LocationType) => {
-    if (confirm(`Are you sure you want to delete "${location.location_name}"?`)) {
+    if (
+      confirm(`Are you sure you want to delete "${location.location_name}"?`)
+    ) {
       console.log("Delete location:", location.id);
     }
   };
@@ -114,22 +118,6 @@ export default function AddressBook() {
     params.toString(),
   );
 
-  const changePageSize = (pageSize = 25) => {
-    if (pageSize !== pagination.per_page) {
-      let currentParams = window.location.search;
-      if (currentParams.includes("per_page=")) {
-        currentParams = currentParams.replace(
-          "per_page=" + pagination.per_page,
-          "per_page=" + pageSize,
-        );
-      } else {
-        const queryAppend = currentParams.includes("?") ? "&" : "?";
-        currentParams += queryAppend + "per_page=" + pageSize;
-      }
-      redirect("/catalogs/address-book" + currentParams, RedirectType.push);
-    }
-  };
-
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -152,7 +140,7 @@ export default function AddressBook() {
         onSave={handleSave}
       />
 
-      <CustomPagination {...pagination} changePageSize={changePageSize} />
+      <CustomPagination {...pagination} endpoint="/catalogs/address-book" />
       <div className="overflow-hidden rounded-md border">
         <Table>
           <TableHeader className="bg-muted sticky top-0 z-10">
@@ -187,7 +175,7 @@ export default function AddressBook() {
           </TableBody>
         </Table>
       </div>
-      <CustomPagination {...pagination} changePageSize={changePageSize} />
+      <CustomPagination {...pagination} endpoint="/catalogs/address-book" />
     </div>
   );
 }

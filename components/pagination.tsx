@@ -11,16 +11,64 @@ import {
 import { PaginationType } from "@/types/shipments";
 
 import { Button } from "@/components/ui/button";
-import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
+import {
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  TriangleAlertIcon,
+} from "lucide-react";
 import ShipmentsConfig from "@/configs/shipments";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
+import { redirect, RedirectType } from "next/navigation";
+
+const getPageList = (startPage: number = 1, lastPage: number = 1) => {
+  const components = [];
+  for (let i = startPage; i <= lastPage; i++) {
+    components.push(
+      <option key={i} value={i}>
+        {i}
+      </option>,
+    );
+  }
+  return components;
+};
 
 type CustomPaginationType = {
-  changePageSize: (pageSize: number) => void;
+  endpoint: string;
 } & PaginationType;
 
 const CustomPagination: React.FC<CustomPaginationType> = (
   props: CustomPaginationType,
 ) => {
+  const changePageSize = (pageSize = 25) => {
+    if (pageSize !== props.per_page) {
+      let currentParams = window.location.search;
+      if (currentParams.includes("per_page=")) {
+        currentParams = currentParams.replace(
+          "per_page=" + props.per_page,
+          "per_page=" + pageSize,
+        );
+      } else {
+        const queryAppend = currentParams.includes("?") ? "&" : "?";
+        currentParams += queryAppend + "per_page=" + pageSize;
+      }
+      redirect(props?.endpoint + currentParams, RedirectType.push);
+    }
+  };
+  const jumpToPage = (pageNumber: number) => {
+    if (pageNumber > 0 && pageNumber <= props?.last_page) {
+      let currentParams = window.location.search;
+      if (currentParams.includes("page=")) {
+        currentParams = currentParams.replace(
+          "page=" + props.current_page,
+          "page=" + pageNumber,
+        );
+      } else {
+        const queryAppend = currentParams.includes("?") ? "&" : "?";
+        currentParams += queryAppend + "page=" + pageNumber;
+      }
+      redirect(props?.endpoint + currentParams, RedirectType.push);
+    }
+  };
   return (
     <div className="rounded-md border my-5">
       <div className="text-sm flex align-middle justify-end px-2 py-3">
@@ -31,10 +79,40 @@ const CustomPagination: React.FC<CustomPaginationType> = (
                 Page {props?.current_page} of {props?.last_page}
               </div>
               <div className="flex justify-center items-center gap-2.5 ml-2">
+                <span>Jump to page:</span>
+                <select
+                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+                    jumpToPage(Number(e.target.value));
+                  }}
+                  value={props?.current_page}
+                  className="border rounded-md px-1.5 py-1"
+                >
+                  {props?.current_page > props?.last_page && (
+                    <option value={props?.current_page}>
+                      {props?.current_page}
+                    </option>
+                  )}
+                  {getPageList(1, props?.last_page)}
+                </select>
+                {props?.current_page > props?.last_page && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <TriangleAlertIcon
+                        size={19}
+                        color="oklch(63.7% 0.237 25.331)"
+                      />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>The Current Page value is invalid</p>
+                    </TooltipContent>
+                  </Tooltip>
+                )}
+              </div>
+              <div className="flex justify-center items-center gap-2.5 ml-2">
                 <span>Rows per page:</span>
                 <select
                   onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-                    props.changePageSize(Number(e.target.value));
+                    changePageSize(Number(e.target.value));
                   }}
                   value={props?.per_page}
                   className="border rounded-md px-1.5 py-1"

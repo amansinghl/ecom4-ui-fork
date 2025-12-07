@@ -51,7 +51,9 @@ export default function Packages() {
 
   const packages = data?.data?.packages?.data ?? [];
   const [rowSelection, setRowSelection] = useState({});
-  const [selectedPackage, setSelectedPackage] = useState<PackageType | null>(null);
+  const [selectedPackage, setSelectedPackage] = useState<PackageType | null>(
+    null,
+  );
 
   const handleEdit = (pkg: PackageType) => {
     setSelectedPackage(pkg);
@@ -61,7 +63,11 @@ export default function Packages() {
 
   // TODO
   const handleDelete = (pkg: PackageType) => {
-    if (confirm(`Are you sure you want to delete "${pkg.package_identifier || pkg.id}"?`)) {
+    if (
+      confirm(
+        `Are you sure you want to delete "${pkg.package_identifier || pkg.id}"?`,
+      )
+    ) {
       console.log("Delete package:", pkg.id);
     }
   };
@@ -107,22 +113,6 @@ export default function Packages() {
     params.toString(),
   );
 
-  const changePageSize = (pageSize = 25) => {
-    if (pageSize !== pagination.per_page) {
-      let currentParams = window.location.search;
-      if (currentParams.includes("per_page=")) {
-        currentParams = currentParams.replace(
-          "per_page=" + pagination.per_page,
-          "per_page=" + pageSize,
-        );
-      } else {
-        const queryAppend = currentParams.includes("?") ? "&" : "?";
-        currentParams += queryAppend + "per_page=" + pageSize;
-      }
-      redirect("/catalogs/packages" + currentParams, RedirectType.push);
-    }
-  };
-
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -138,7 +128,7 @@ export default function Packages() {
         </Button>
       </div>
 
-      <CustomPagination {...pagination} changePageSize={changePageSize} />
+      <CustomPagination {...pagination} endpoint="/catalogs/packages" />
       <div className="overflow-hidden rounded-md border">
         <Table>
           <TableHeader className="bg-muted sticky top-0 z-10">
@@ -173,7 +163,7 @@ export default function Packages() {
           </TableBody>
         </Table>
       </div>
-      <CustomPagination {...pagination} changePageSize={changePageSize} />
+      <CustomPagination {...pagination} endpoint="/catalogs/packages" />
     </div>
   );
 }

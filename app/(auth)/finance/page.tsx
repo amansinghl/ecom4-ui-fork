@@ -45,7 +45,7 @@ const defaultPagination: PaginationType = {
 export default function Finance() {
   const params = useSearchParams();
   const pathname = usePathname();
-  
+
   const queryParams = {
     sort: "shipment_no|desc",
     page: "1",
@@ -58,7 +58,7 @@ export default function Finance() {
     to_date: "",
     shipment_nos: "",
   };
-  
+
   const { data, isLoading, error } = useCodTransactions(queryParams);
 
   const transactions = data?.data?.cod_transactions?.data ?? [];
@@ -96,22 +96,6 @@ export default function Finance() {
     params.toString(),
   );
 
-  const changePageSize = (pageSize = 25) => {
-    if (pageSize !== pagination.per_page) {
-      let currentParams = window.location.search;
-      if (currentParams.includes("per_page=")) {
-        currentParams = currentParams.replace(
-          "per_page=" + pagination.per_page,
-          "per_page=" + pageSize,
-        );
-      } else {
-        const queryAppend = currentParams.includes("?") ? "&" : "?";
-        currentParams += queryAppend + "per_page=" + pageSize;
-      }
-      redirect("/finance" + currentParams, RedirectType.push);
-    }
-  };
-
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -123,7 +107,7 @@ export default function Finance() {
         </div>
       </div>
 
-      <CustomPagination {...pagination} changePageSize={changePageSize} />
+      <CustomPagination {...pagination} endpoint="/finance" />
       <div className="overflow-hidden rounded-md border">
         <Table>
           <TableHeader className="bg-muted sticky top-0 z-10">
@@ -158,7 +142,7 @@ export default function Finance() {
           </TableBody>
         </Table>
       </div>
-      <CustomPagination {...pagination} changePageSize={changePageSize} />
+      <CustomPagination {...pagination} endpoint="/finance" />
     </div>
   );
 }
