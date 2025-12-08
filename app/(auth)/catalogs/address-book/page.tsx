@@ -50,7 +50,7 @@ export default function AddressBook() {
     Object.fromEntries(params.entries()),
   );
 
-  const locations = data?.data?.locations?.data ?? [];
+  const locations = data?.locations?.data ?? [];
   const [rowSelection, setRowSelection] = useState({});
   const [dialogOpen, setDialogOpen] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState<LocationType | null>(

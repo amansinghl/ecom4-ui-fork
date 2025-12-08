@@ -49,7 +49,7 @@ export default function Products() {
     Object.fromEntries(params.entries()),
   );
 
-  const products = data?.data?.products?.data ?? [];
+  const products = data?.products?.data ?? [];
   const [rowSelection, setRowSelection] = useState({});
   const [selectedProduct, setSelectedProduct] = useState<ProductType | null>(
     null,

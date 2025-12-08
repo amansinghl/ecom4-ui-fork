@@ -49,7 +49,7 @@ export default function Packages() {
     Object.fromEntries(params.entries()),
   );
 
-  const packages = data?.data?.packages?.data ?? [];
+  const packages = data?.packages?.data ?? [];
   const [rowSelection, setRowSelection] = useState({});
   const [selectedPackage, setSelectedPackage] = useState<PackageType | null>(
     null,
