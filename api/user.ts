@@ -2,7 +2,7 @@ import { apiClient } from "@/lib/api-client";
 import { UserType } from "@/types/user";
 
 type UserResponse = {
-  data: { user: UserType };
+  user: UserType;
 };
 
 type CreditsResponse = {
@@ -16,4 +16,5 @@ type CreditsResponse = {
 
 export const getUser = () => apiClient<UserResponse>("user");
 
-export const getCredits = () => apiClient<CreditsResponse>("transactions/credit");
+export const getCredits = () =>
+  apiClient<CreditsResponse>("transactions/credit");

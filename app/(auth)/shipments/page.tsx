@@ -6,12 +6,7 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import {
-  usePathname,
-  useSearchParams,
-  redirect,
-  RedirectType,
-} from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { columns } from "@/components/shipments/columns";
 import {
   Table,
@@ -45,7 +40,7 @@ export default function Shipments() {
     Object.fromEntries(params.entries()),
   );
 
-  const shipments = data?.data?.shipments?.data ?? [];
+  const shipments = data?.shipments?.data ?? [];
 
   const table = useReactTable({
     data: shipments,
@@ -66,64 +61,61 @@ export default function Shipments() {
     return <h1>Loading...</h1>;
   }
 
-  const rawPagination = data?.data?.shipments ?? defaultPagination;
+  const rawPagination = data?.shipments ?? defaultPagination;
   const pagination = decoratePagination(
     rawPagination,
     pathname,
     params.toString(),
   );
 
-  const changePageSize = (pageSize = 25) => {
-    if (pageSize !== pagination.per_page) {
-      let currentParams = window.location.search;
-      if (currentParams.includes("per_page=")) {
-        currentParams = currentParams.replace(
-          "per_page=" + pagination.per_page,
-          "per_page=" + pageSize,
-        );
-      } else {
-        const queryAppend = currentParams.includes("?") ? "&" : "?";
-        currentParams += queryAppend + "per_page=" + pageSize;
-      }
-      redirect("/shipments" + currentParams, RedirectType.push);
-    }
-  };
-
   return (
     <div>
-      <CustomPagination {...pagination} changePageSize={changePageSize} />
+      <CustomPagination {...pagination} endpoint="/shipments" />
       <div className="overflow-hidden rounded-md border">
-        <Table>
-          <TableHeader className="bg-muted sticky top-0 z-10">
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id}>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext(),
-                        )}
-                  </TableHead>
-                ))}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {table?.getRowModel()?.rows?.map((row) => (
-              <TableRow key={row.id}>
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
-                ))}
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+        {shipments?.length > 0 ? (
+          <Table>
+            <TableHeader className="bg-muted sticky top-0 z-10">
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => (
+                    <TableHead key={header.id}>
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext(),
+                          )}
+                    </TableHead>
+                  ))}
+                </TableRow>
+              ))}
+            </TableHeader>
+            <TableBody>
+              {table?.getRowModel()?.rows?.map((row) => (
+                <TableRow key={row.id}>
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id}>
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext(),
+                      )}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        ) : (
+          <div className="py-3 text-center">
+            <div>No data available.</div>
+            <div className="text-sm text-secondary-foreground font-semibold">
+              Hint: You might wanna check the filters or the other search
+              criteria.
+            </div>
+          </div>
+        )}
       </div>
-      <CustomPagination {...pagination} changePageSize={changePageSize} />
+      <CustomPagination {...pagination} endpoint="/shipments" />
     </div>
   );
 }

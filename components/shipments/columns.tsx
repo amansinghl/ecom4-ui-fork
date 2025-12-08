@@ -14,56 +14,16 @@ import {
   Phone,
   MapPin,
   Truck,
-  Clock,
-  CheckCircle,
-  AlertCircle,
   Calendar,
   Package,
   Box,
   CreditCard,
-  Weight,
 } from "lucide-react";
 import { copyToClipBoard } from "@/lib/client_utils";
 import { Avatar, AvatarFallback } from "../ui/avatar";
 import { Badge } from "../ui/badge";
-
-const getStatusIcon = (status: string | undefined) => {
-  if (!status) return <Clock className="size-4 text-gray-600" />;
-
-  switch (status.toLowerCase()) {
-    case "delivered":
-      return <CheckCircle className="size-4 text-green-600" />;
-    case "in transit":
-      return <Truck className="size-4 text-blue-600" />;
-    case "processing":
-      return <Clock className="size-4 text-yellow-600" />;
-    case "delayed":
-      return <AlertCircle className="size-4 text-red-600" />;
-    default:
-      return <Clock className="size-4 text-gray-600" />;
-  }
-};
-
-const getStatusVariant = (status: string | undefined) => {
-  if (!status) return "outline";
-
-  switch (status.toLowerCase()) {
-    case "delivered":
-      return "default";
-    case "in transit":
-      return "secondary";
-    case "processing":
-      return "outline";
-    case "delayed":
-      return "destructive";
-    default:
-      return "outline";
-  }
-};
-
-const getPaymentModeColor = (isCod: boolean) => {
-  return isCod ? "text-blue-600" : "text-green-600";
-};
+import Link from "next/link";
+import { getPaymentModeColor, getStatusIcon, getStatusVariant } from "./utils";
 
 export const columns: ColumnDef<ShipmentType>[] = [
   {
@@ -77,9 +37,16 @@ export const columns: ColumnDef<ShipmentType>[] = [
           <Tooltip>
             <TooltipTrigger asChild>
               <div className="group hover:bg-muted/50 cursor-pointer space-y-1 rounded-md p-2 transition-colors">
-                <div className="text-primary group-hover:text-primary/80 font-mono text-sm font-semibold transition-colors">
+                <Link
+                  href={
+                    row?.original?.shipment_no
+                      ? `/shipments/${row.original.shipment_no}`
+                      : "#"
+                  }
+                  className="text-primary group-hover:text-primary/80 font-mono text-sm font-semibold transition-colors"
+                >
                   {row.original.shipment_no || "N/A"}
-                </div>
+                </Link>
                 <div className="text-muted-foreground flex items-center gap-2 text-xs">
                   <span className="font-mono">
                     {row.original.tracking_id || "N/A"}
@@ -243,13 +210,40 @@ export const columns: ColumnDef<ShipmentType>[] = [
 
       return (
         <div className="space-y-1">
-          <Badge variant="outline" className="text-xs">
+          <Badge variant="outline" className="text-xs max-w-36 text-ellipsis">
             <Package className="mr-1 size-3" />
             {row.original.product || "Unknown"}
           </Badge>
           {/* <div className={`text-xs font-medium ${paymentColor}`}>
             {paymentMode}
           </div> */}
+        </div>
+      );
+    },
+    enableSorting: false,
+  },
+  {
+    accessorKey: "payment_modes",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Payment Mode" />
+    ),
+    cell: ({ row }) => {
+      const isCod = Number(row?.original?.cod_value ?? "0") > 0;
+      return (
+        <div className="flex flex-col">
+          <div className="flex gap-1 items-center">
+            {isCod ? (
+              <Box color="purple" size={16} />
+            ) : (
+              <CreditCard color="green" size={16} />
+            )}
+            {isCod ? "COD" : "Prepaid"}
+          </div>
+          {isCod && (
+            <div className="text-muted-foreground text-xs font-bold">
+              Amt: {row?.original?.cod_value || "0.0"}
+            </div>
+          )}
         </div>
       );
     },
@@ -308,50 +302,6 @@ export const columns: ColumnDef<ShipmentType>[] = [
     cell: ({ row }) => (
       <div className="text-sm font-semibold text-green-600">
         {row.original.total_price || "N/A"}
-      </div>
-    ),
-    enableSorting: false,
-  },
-  {
-    accessorKey: "payment_modes",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Payment Mode" />
-    ),
-    cell: ({ row }) => {
-      const isCod = Number(row?.original?.cod_value ?? "0") > 0;
-      return (
-        <div className="flex flex-col">
-          <div className="flex gap-1 items-center">
-            {isCod ? (
-              <Box color="purple" size={16} />
-            ) : (
-              <CreditCard color="green" size={16} />
-            )}
-            {isCod ? "COD" : "Prepaid"}
-          </div>
-          {isCod && (
-            <div className="text-muted-foreground text-xs font-bold">
-              Amt: {row?.original?.cod_value || "0.0"}
-            </div>
-          )}
-        </div>
-      );
-    },
-    enableSorting: false,
-  },
-  {
-    accessorKey: "weight",
-    header: ({ column }) => (
-      <DataTableColumnHeader
-        className="text-center"
-        column={column}
-        title="Weight"
-      />
-    ),
-    cell: ({ row }) => (
-      <div className="flex gap-1 align-middle justify-center items-center">
-        <Weight size={16} />
-        {row?.original?.weight} Kg
       </div>
     ),
     enableSorting: false,

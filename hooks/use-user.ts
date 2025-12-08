@@ -14,7 +14,7 @@ export function useUser() {
     retry: false,
   });
 
-  const user = query.data?.data?.user ?? null;
+  const user = query.data?.user ?? null;
 
   const refreshCredits = useCallback(async () => {
     if (!user) return;
