@@ -81,10 +81,6 @@ const data = {
       title: "Orders",
       url: "/orders",
       icon: ShoppingCart,
-      items: [
-          { title: "Manage Orders", url: "/orders", icon: Package2 },
-          { title: "Bulk", url: "/orders/bulk", icon: Layers },
-        ],
     },
     {
       title: "Shipments",

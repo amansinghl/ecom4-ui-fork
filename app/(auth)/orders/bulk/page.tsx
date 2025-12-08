@@ -1,3 +1,3 @@
-const Orders = () => <h1>This is Orders Page</h1>;
+const BulkOrders = () => <h1>This is Bulk Orders Page</h1>;
 
-export default Orders;
+export default BulkOrders;
