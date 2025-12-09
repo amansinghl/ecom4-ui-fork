@@ -2,13 +2,11 @@ import { apiClient } from "@/lib/api-client";
 import { LocationsResponseType, LocationType } from "@/types/locations";
 
 type LocationsApiResponse = {
-  meta: { status_code: number; status: string; message: string };
-  data: { locations: LocationsResponseType };
+  locations: LocationsResponseType;
 };
 
 type UpdateLocationApiResponse = {
-  meta: { status_code: number; status: string; message: string };
-  data: { location: LocationType };
+  location: LocationType;
 };
 
 export const getLocations = (params?: Record<string, string>) =>
@@ -21,5 +19,11 @@ export const updateLocation = (
   apiClient<UpdateLocationApiResponse>(`locations/${locationId}`, {
     method: "PUT",
     body: data,
+  });
+
+export const deleteLocation = (locationData: Record<string, any>) =>
+  apiClient<UpdateLocationApiResponse>("locations", {
+    method: "POST",
+    body: { ...locationData, visibility: 0 },
   });
 

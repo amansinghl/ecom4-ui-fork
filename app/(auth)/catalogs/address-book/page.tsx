@@ -6,6 +6,9 @@ import { type LocationType } from "@/types/locations";
 import { LocationDialog } from "@/components/catalogs/address-book/location-dialog";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
+import { deleteLocation } from "@/api/locations";
+import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import {
   flexRender,
   getCoreRowModel,
@@ -46,6 +49,7 @@ const defaultPagination: PaginationType = {
 export default function AddressBook() {
   const params = useSearchParams();
   const pathname = usePathname();
+  const queryClient = useQueryClient();
   const { data, isLoading, error } = useLocations(
     Object.fromEntries(params.entries()),
   );
@@ -62,12 +66,21 @@ export default function AddressBook() {
     setDialogOpen(true);
   };
 
-  // TODO
-  const handleDelete = (location: LocationType) => {
+  const handleDelete = async (location: LocationType) => {
     if (
-      confirm(`Are you sure you want to delete "${location.location_name}"?`)
+      !confirm(`Are you sure you want to delete "${location.location_name}"?`)
     ) {
-      console.log("Delete location:", location.id);
+      return;
+    }
+
+    try {
+      await deleteLocation(location as Record<string, any>);
+      toast.success("Location deleted successfully");
+      // Invalidate queries to refetch data
+      await queryClient.invalidateQueries({ queryKey: ["locations"] });
+    } catch (error) {
+      toast.error("Failed to delete location");
+      console.error("Error deleting location:", error);
     }
   };
 
@@ -111,7 +124,7 @@ export default function AddressBook() {
     return <h1>Loading...</h1>;
   }
 
-  const rawPagination = data?.data?.locations ?? defaultPagination;
+  const rawPagination = data?.locations ?? defaultPagination;
   const pagination = decoratePagination(
     rawPagination,
     pathname,
