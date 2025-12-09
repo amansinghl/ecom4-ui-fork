@@ -20,9 +20,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { updateLocation } from "@/api/locations";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { updateLocation, getPincodeDetail, createLocation, getCountriesList } from "@/api/locations";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { Check, ChevronsUpDown, Search } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface LocationDialogProps {
   open: boolean;
@@ -66,7 +73,64 @@ export function LocationDialog({
     state: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoadingPincode, setIsLoadingPincode] = useState(false);
+  const [errors, setErrors] = useState<{
+    email?: string;
+    contact?: string;
+  }>({});
+  const [countries, setCountries] = useState<Array<{id: number; name: string; isd_code: string}>>([]);
+  const [isdCodeOpen, setIsdCodeOpen] = useState(false);
+  const [isdCodeSearch, setIsdCodeSearch] = useState("");
+  const [isLoadingCountries, setIsLoadingCountries] = useState(false);
   const originalDataRef = useRef<FormData | null>(null);
+  const lastFetchedPincodeRef = useRef<string>("");
+
+  const validateEmail = (email: string): boolean => {
+    if (!email) return true; // Optional field
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const validatePhone = (phone: string): boolean => {
+    if (!phone) return true; // Optional field
+    const phoneRegex = /^\d{10}$/;
+    return phoneRegex.test(phone);
+  };
+
+  // Fetch countries list when dialog opens
+  useEffect(() => {
+    if (open && countries.length === 0) {
+      setIsLoadingCountries(true);
+      getCountriesList()
+        .then((data) => {
+          setCountries(data);
+        })
+        .catch((error) => {
+          console.error("Error fetching countries:", error);
+          toast.error("Failed to load countries list");
+        })
+        .finally(() => {
+          setIsLoadingCountries(false);
+        });
+    }
+  }, [open, countries.length]);
+
+  // Filter countries based on search
+  const filteredCountries = countries.filter((country) =>
+    country.name.toLowerCase().includes(isdCodeSearch.toLowerCase()) ||
+    country.isd_code.includes(isdCodeSearch) ||
+    `+${country.isd_code}`.includes(isdCodeSearch)
+  );
+
+  // Get selected country display
+  const selectedCountry = countries.find(
+    (c) => c.isd_code === formData.calling_code
+  );
+  const selectedCountryDisplay = selectedCountry
+    ? `+${selectedCountry.isd_code} (${selectedCountry.name})`
+    : formData.calling_code
+    ? `+${formData.calling_code}`
+    : "Select ISD code";
 
   useEffect(() => {
     if (location) {
@@ -133,6 +197,10 @@ export function LocationDialog({
         state: "",
       });
       originalDataRef.current = null;
+      lastFetchedPincodeRef.current = "";
+      setErrors({});
+      setIsdCodeSearch("");
+      setIsdCodeOpen(false);
     }
   }, [location, open]);
 
@@ -158,8 +226,61 @@ export function LocationDialog({
     );
   };
 
+  const fetchPincodeDetails = async (pincode: string) => {
+    // Only fetch if pincode is 6 digits (Indian pincode format) and not already fetched
+    if (pincode.length === 6 && /^\d+$/.test(pincode) && lastFetchedPincodeRef.current !== pincode) {
+      lastFetchedPincodeRef.current = pincode;
+      setIsLoadingPincode(true);
+      try {
+        const pincodeData = await getPincodeDetail(pincode);
+        setFormData((prev) => ({
+          ...prev,
+          city: pincodeData.city || prev.city,
+          state: pincodeData.state || prev.state,
+          country: pincodeData.country || prev.country,
+        }));
+      } catch (error) {
+        // Silently fail - don't show error toast for pincode lookup
+        console.error("Error fetching pincode details:", error);
+        lastFetchedPincodeRef.current = ""; // Reset on error to allow retry
+      } finally {
+        setIsLoadingPincode(false);
+      }
+    }
+  };
+
+  const handlePincodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newPincode = e.target.value;
+    setFormData({ ...formData, pincode: newPincode });
+    
+    // Trigger API call when 6 digits are entered
+    const trimmedPincode = newPincode.trim();
+    if (trimmedPincode.length === 6) {
+      fetchPincodeDetails(trimmedPincode);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validate email and phone
+    const newErrors: { email?: string; contact?: string } = {};
+    
+    if (formData.email && !validateEmail(formData.email)) {
+      newErrors.email = "Please enter a valid email address";
+    }
+    
+    if (formData.contact && !validatePhone(formData.contact)) {
+      newErrors.contact = "Please enter a valid 10-digit phone number";
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      toast.error("Please fix the validation errors");
+      return;
+    }
+
+    setErrors({});
 
     // For edit mode, check if there are changes
     if (location?.id && !hasChanges()) {
@@ -168,10 +289,17 @@ export function LocationDialog({
       return;
     }
 
-    // Split address into address_line_1 and address_line_2 (max 200 chars)
-    const addressParts = formData.address.slice(0, 200).split(", ");
-    const address_line_1 = addressParts[0] || "";
-    const address_line_2 = addressParts.slice(1).join(", ") || null;
+    // Split address: if more than 99 chars, first 99 to address_line_1, rest to address_line_2
+    const address = formData.address.trim();
+    let address_line_1: string | null = null;
+    let address_line_2: string | null = null;
+    
+    if (address.length > 99) {
+      address_line_1 = address.slice(0, 99);
+      address_line_2 = address.slice(99);
+    } else if (address.length > 0) {
+      address_line_1 = address;
+    }
 
     // If editing an existing location, include all fields from original location
     // and update only the changed fields
@@ -201,7 +329,7 @@ export function LocationDialog({
           vendor_gst_no: location.vendor_gst_no ?? null,
         }
       : {
-          // For new locations, only include form fields
+          // For new locations, include all required fields
           location_name: formData.location_name,
           location_type: formData.location_type || null,
           full_name: formData.full_name || null,
@@ -214,7 +342,9 @@ export function LocationDialog({
           pincode: formData.pincode || null,
           city: formData.city || null,
           state: formData.state || null,
-        };
+          visibility: 1,
+          channel_name: "Vamaship",
+        } as Record<string, any>;
 
     // If editing an existing location, call the PUT API
     if (location?.id) {
@@ -233,9 +363,21 @@ export function LocationDialog({
         setIsSubmitting(false);
       }
     } else {
-      // For new locations, use the existing onSave callback
-      onSave(locationData);
-      onOpenChange(false);
+      // For new locations, call the POST API
+      setIsSubmitting(true);
+      try {
+        await createLocation(locationData as Record<string, any>);
+        toast.success("Location created successfully");
+        // Invalidate queries to refetch data
+        await queryClient.invalidateQueries({ queryKey: ["locations"] });
+        onSave(locationData);
+        onOpenChange(false);
+      } catch (error) {
+        toast.error("Failed to create location");
+        console.error("Error creating location:", error);
+      } finally {
+        setIsSubmitting(false);
+      }
     }
   };
 
@@ -298,10 +440,27 @@ export function LocationDialog({
                 id="email"
                 type="email"
                 value={formData.email}
-                onChange={(e) =>
-                  setFormData({ ...formData, email: e.target.value })
-                }
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setFormData({ ...formData, email: value });
+                  // Real-time validation
+                  if (value && !validateEmail(value)) {
+                    setErrors((prev) => ({ ...prev, email: "Please enter a valid email address" }));
+                  } else {
+                    setErrors((prev) => ({ ...prev, email: undefined }));
+                  }
+                }}
+                onBlur={(e) => {
+                  const value = e.target.value;
+                  if (value && !validateEmail(value)) {
+                    setErrors((prev) => ({ ...prev, email: "Please enter a valid email address" }));
+                  }
+                }}
+                className={errors.email ? "border-red-500" : ""}
               />
+              {errors.email && (
+                <p className="text-sm text-red-500">{errors.email}</p>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -317,13 +476,71 @@ export function LocationDialog({
 
             <div className="space-y-2">
               <Label htmlFor="calling_code">ISD Code</Label>
-              <Input
-                id="calling_code"
-                value={formData.calling_code}
-                onChange={(e) =>
-                  setFormData({ ...formData, calling_code: e.target.value })
-                }
-              />
+              <Popover open={isdCodeOpen} onOpenChange={setIsdCodeOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={isdCodeOpen}
+                    className="w-full justify-between"
+                    type="button"
+                  >
+                    {isLoadingCountries ? (
+                      "Loading..."
+                    ) : (
+                      <>
+                        {selectedCountryDisplay}
+                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[400px] p-0" align="start">
+                  <div className="flex items-center border-b px-3">
+                    <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
+                    <Input
+                      placeholder="Search country or code..."
+                      value={isdCodeSearch}
+                      onChange={(e) => setIsdCodeSearch(e.target.value)}
+                      className="border-0 focus-visible:ring-0"
+                    />
+                  </div>
+                  <div className="max-h-[300px] overflow-y-auto">
+                    {filteredCountries.length === 0 ? (
+                      <div className="py-6 text-center text-sm text-muted-foreground">
+                        No country found.
+                      </div>
+                    ) : (
+                      filteredCountries.map((country) => (
+                        <button
+                          key={country.id}
+                          type="button"
+                          onClick={() => {
+                            setFormData({ ...formData, calling_code: country.isd_code });
+                            setIsdCodeOpen(false);
+                            setIsdCodeSearch("");
+                          }}
+                          className={cn(
+                            "relative flex w-full cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-accent hover:text-accent-foreground",
+                            formData.calling_code === country.isd_code && "bg-accent"
+                          )}
+                        >
+                          <Check
+                            className={cn(
+                              "mr-2 h-4 w-4",
+                              formData.calling_code === country.isd_code
+                                ? "opacity-100"
+                                : "opacity-0"
+                            )}
+                          />
+                          <span className="font-medium">+{country.isd_code}</span>
+                          <span className="ml-2 text-muted-foreground">{country.name}</span>
+                        </button>
+                      ))
+                    )}
+                  </div>
+                </PopoverContent>
+              </Popover>
             </div>
 
             <div className="space-y-2">
@@ -332,10 +549,30 @@ export function LocationDialog({
                 id="contact"
                 type="tel"
                 value={formData.contact}
-                onChange={(e) =>
-                  setFormData({ ...formData, contact: e.target.value })
-                }
+                onChange={(e) => {
+                  // Only allow digits and limit to 10
+                  const value = e.target.value.replace(/\D/g, "").slice(0, 10);
+                  setFormData({ ...formData, contact: value });
+                  // Real-time validation
+                  if (value && !validatePhone(value)) {
+                    setErrors((prev) => ({ ...prev, contact: "Please enter a valid 10-digit phone number" }));
+                  } else {
+                    setErrors((prev) => ({ ...prev, contact: undefined }));
+                  }
+                }}
+                onBlur={(e) => {
+                  const value = e.target.value;
+                  if (value && !validatePhone(value)) {
+                    setErrors((prev) => ({ ...prev, contact: "Please enter a valid 10-digit phone number" }));
+                  }
+                }}
+                className={errors.contact ? "border-red-500" : ""}
+                placeholder="10-digit phone number"
+                maxLength={10}
               />
+              {errors.contact && (
+                <p className="text-sm text-red-500">{errors.contact}</p>
+              )}
             </div>
 
             <div className="space-y-2 md:col-span-2">
@@ -360,9 +597,10 @@ export function LocationDialog({
               <Input
                 id="pincode"
                 value={formData.pincode}
-                onChange={(e) =>
-                  setFormData({ ...formData, pincode: e.target.value })
-                }
+                onChange={handlePincodeChange}
+                disabled={isLoadingPincode}
+                placeholder={isLoadingPincode ? "Loading..." : ""}
+                maxLength={6}
               />
             </div>
 
