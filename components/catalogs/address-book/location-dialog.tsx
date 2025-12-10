@@ -85,6 +85,9 @@ export function LocationDialog({
   const originalDataRef = useRef<FormData | null>(null);
   const lastFetchedPincodeRef = useRef<string>("");
 
+  // Check if fields should be disabled (for non-Vamaship locations)
+  const isNonVamashipLocation = Boolean(location?.id && location?.channel_name && location.channel_name !== "Vamaship");
+
   const validateEmail = (email: string): boolean => {
     if (!email) return true; // Optional field
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -211,6 +214,17 @@ export function LocationDialog({
     }
 
     const original = originalDataRef.current;
+    
+    // For non-Vamaship locations, only check editable fields
+    if (isNonVamashipLocation) {
+      return (
+        formData.full_name !== original.full_name ||
+        formData.email !== original.email ||
+        formData.contact !== original.contact
+      );
+    }
+    
+    // For Vamaship locations, check all fields
     return (
       formData.location_name !== original.location_name ||
       formData.location_type !== original.location_type ||
@@ -250,6 +264,11 @@ export function LocationDialog({
   };
 
   const handlePincodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Don't allow changes if this is a non-Vamaship location
+    if (isNonVamashipLocation) {
+      return;
+    }
+    
     const newPincode = e.target.value;
     setFormData({ ...formData, pincode: newPincode });
     
@@ -304,30 +323,56 @@ export function LocationDialog({
     // If editing an existing location, include all fields from original location
     // and update only the changed fields
     const locationData: Partial<LocationType> = location?.id
-      ? {
-          // Preserve all existing fields
-          location_name: formData.location_name,
-          location_type: formData.location_type || null,
-          full_name: formData.full_name || null,
-          email: formData.email || null,
-          country: formData.country || null,
-          calling_code: formData.calling_code || null,
-          contact: formData.contact || null,
-          address_line_1: address_line_1 || null,
-          address_line_2: address_line_2,
-          landmark: location.landmark ?? null,
-          pincode: formData.pincode || null,
-          city: formData.city || null,
-          state: formData.state || null,
-          visibility: location.visibility ?? null,
-          channel_name: location.channel_name ?? null,
-          open_time: location.open_time ?? null,
-          closed_time: location.closed_time ?? null,
-          lat: location.lat ?? null,
-          long: location.long ?? null,
-          vendor_pan_no: location.vendor_pan_no ?? null,
-          vendor_gst_no: location.vendor_gst_no ?? null,
-        }
+      ? isNonVamashipLocation
+        ? {
+            // For non-Vamaship locations, only update editable fields
+            // Preserve all other fields from original location
+            location_name: location.location_name ?? null,
+            location_type: location.location_type ?? null,
+            full_name: formData.full_name || null,
+            email: formData.email || null,
+            country: location.country ?? null,
+            calling_code: location.calling_code ?? null,
+            contact: formData.contact || null,
+            address_line_1: location.address_line_1 ?? null,
+            address_line_2: location.address_line_2 ?? null,
+            landmark: location.landmark ?? null,
+            pincode: location.pincode ?? null,
+            city: location.city ?? null,
+            state: location.state ?? null,
+            visibility: location.visibility ?? null,
+            channel_name: location.channel_name ?? null,
+            open_time: location.open_time ?? null,
+            closed_time: location.closed_time ?? null,
+            lat: location.lat ?? null,
+            long: location.long ?? null,
+            vendor_pan_no: location.vendor_pan_no ?? null,
+            vendor_gst_no: location.vendor_gst_no ?? null,
+          }
+        : {
+            // For Vamaship locations, allow all fields to be updated
+            location_name: formData.location_name,
+            location_type: formData.location_type || null,
+            full_name: formData.full_name || null,
+            email: formData.email || null,
+            country: formData.country || null,
+            calling_code: formData.calling_code || null,
+            contact: formData.contact || null,
+            address_line_1: address_line_1 || null,
+            address_line_2: address_line_2,
+            landmark: location.landmark ?? null,
+            pincode: formData.pincode || null,
+            city: formData.city || null,
+            state: formData.state || null,
+            visibility: location.visibility ?? null,
+            channel_name: location.channel_name ?? null,
+            open_time: location.open_time ?? null,
+            closed_time: location.closed_time ?? null,
+            lat: location.lat ?? null,
+            long: location.long ?? null,
+            vendor_pan_no: location.vendor_pan_no ?? null,
+            vendor_gst_no: location.vendor_gst_no ?? null,
+          }
       : {
           // For new locations, include all required fields
           location_name: formData.location_name,
@@ -401,6 +446,8 @@ export function LocationDialog({
                   setFormData({ ...formData, location_name: e.target.value })
                 }
                 required
+                disabled={isNonVamashipLocation}
+                className={isNonVamashipLocation ? "bg-muted cursor-not-allowed" : ""}
               />
             </div>
 
@@ -411,8 +458,9 @@ export function LocationDialog({
                 onValueChange={(value) =>
                   setFormData({ ...formData, location_type: value })
                 }
+                disabled={isNonVamashipLocation}
               >
-                <SelectTrigger id="location_type">
+                <SelectTrigger id="location_type" className={isNonVamashipLocation ? "bg-muted cursor-not-allowed" : ""}>
                   <SelectValue placeholder="Select type" />
                 </SelectTrigger>
                 <SelectContent>
@@ -471,6 +519,8 @@ export function LocationDialog({
                 onChange={(e) =>
                   setFormData({ ...formData, country: e.target.value })
                 }
+                disabled={isNonVamashipLocation}
+                className={isNonVamashipLocation ? "bg-muted cursor-not-allowed" : ""}
               />
             </div>
 
@@ -482,8 +532,12 @@ export function LocationDialog({
                     variant="outline"
                     role="combobox"
                     aria-expanded={isdCodeOpen}
-                    className="w-full justify-between"
+                    className={cn(
+                      "w-full justify-between",
+                      isNonVamashipLocation && "bg-muted cursor-not-allowed"
+                    )}
                     type="button"
+                    disabled={isNonVamashipLocation}
                   >
                     {isLoadingCountries ? (
                       "Loading..."
@@ -589,6 +643,8 @@ export function LocationDialog({
                   setFormData({ ...formData, address: e.target.value.slice(0, 200) })
                 }
                 maxLength={200}
+                disabled={isNonVamashipLocation}
+                className={isNonVamashipLocation ? "bg-muted cursor-not-allowed" : ""}
               />
             </div>
 
@@ -598,9 +654,10 @@ export function LocationDialog({
                 id="pincode"
                 value={formData.pincode}
                 onChange={handlePincodeChange}
-                disabled={isLoadingPincode}
+                disabled={isLoadingPincode || isNonVamashipLocation}
                 placeholder={isLoadingPincode ? "Loading..." : ""}
                 maxLength={6}
+                className={isNonVamashipLocation ? "bg-muted cursor-not-allowed" : ""}
               />
             </div>
 
@@ -612,6 +669,8 @@ export function LocationDialog({
                 onChange={(e) =>
                   setFormData({ ...formData, city: e.target.value })
                 }
+                disabled={isNonVamashipLocation}
+                className={isNonVamashipLocation ? "bg-muted cursor-not-allowed" : ""}
               />
             </div>
 
@@ -623,6 +682,8 @@ export function LocationDialog({
                 onChange={(e) =>
                   setFormData({ ...formData, state: e.target.value })
                 }
+                disabled={isNonVamashipLocation}
+                className={isNonVamashipLocation ? "bg-muted cursor-not-allowed" : ""}
               />
             </div>
           </div>
