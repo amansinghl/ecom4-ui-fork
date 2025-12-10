@@ -2,7 +2,7 @@
 
 import { useCallback } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { getUser, getCredits } from "@/api/user";
+import { getUser, getCredits, getBranches } from "@/api/user";
 
 export function useUser() {
   const queryClient = useQueryClient();
@@ -53,4 +53,16 @@ export function useUser() {
     error: query.error,
     refreshCredits,
   };
+}
+
+export function useBranches() {
+  return useQuery({
+    queryKey: ["branches"],
+    queryFn: async () => {
+      const data = await getBranches();
+      return data;
+    },
+    staleTime: 1000 * 60 * 5, // 5 min
+    placeholderData: (previousData) => previousData,
+  });
 }
