@@ -28,6 +28,10 @@ import {
 import CustomPagination from "@/components/pagination";
 import { decoratePagination } from "@/decorators/pagination";
 import { PaginationType } from "@/types/shipments";
+import { PackageDialog } from "@/components/catalogs/packages/package-dialog";
+import { updatePackage } from "@/api/packages";
+import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 const defaultPagination: PaginationType = {
   first_page_url: null,
@@ -45,6 +49,7 @@ const defaultPagination: PaginationType = {
 export default function Packages() {
   const params = useSearchParams();
   const pathname = usePathname();
+  const queryClient = useQueryClient();
   const { data, isLoading, error } = usePackages(
     Object.fromEntries(params.entries()),
   );
@@ -54,11 +59,11 @@ export default function Packages() {
   const [selectedPackage, setSelectedPackage] = useState<PackageType | null>(
     null,
   );
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   const handleEdit = (pkg: PackageType) => {
     setSelectedPackage(pkg);
-    // TODO: Open edit dialog
-    console.log("Edit package:", pkg);
+    setDialogOpen(true);
   };
 
   // TODO
@@ -74,8 +79,36 @@ export default function Packages() {
 
   const handleAdd = () => {
     setSelectedPackage(null);
-    // TODO: Open add dialog
-    console.log("Add package");
+    setDialogOpen(true);
+  };
+
+  const handleMakeDefault = async (pkg: PackageType) => {
+    if (!pkg.id) {
+      toast.error("Package ID is required");
+      return;
+    }
+
+    try {
+      await updatePackage(pkg.id, {
+        package_identifier: pkg.package_identifier || "",
+        length: String(pkg.length || ""),
+        breadth: String(pkg.breadth || ""),
+        height: String(pkg.height || ""),
+        unit: pkg.unit || "cm",
+        default_package: 1,
+      });
+      
+      toast.success("Package set as default");
+      // Invalidate queries to refetch data
+      await queryClient.invalidateQueries({ queryKey: ["packages"] });
+    } catch (error) {
+      toast.error("Failed to set package as default");
+      console.error("Error setting default package:", error);
+    }
+  };
+
+  const handleSave = (packageData: Partial<PackageType>) => {
+    console.log("Save package:", packageData);
   };
 
   const table = useReactTable({
@@ -91,6 +124,7 @@ export default function Packages() {
     meta: {
       onEdit: handleEdit,
       onDelete: handleDelete,
+      onMakeDefault: handleMakeDefault,
     },
     initialState: {
       columnPinning: {
@@ -106,7 +140,7 @@ export default function Packages() {
     return <h1>Loading...</h1>;
   }
 
-  const rawPagination = data?.data?.packages ?? defaultPagination;
+  const rawPagination = data?.packages ?? defaultPagination;
   const pagination = decoratePagination(
     rawPagination,
     pathname,
@@ -127,6 +161,13 @@ export default function Packages() {
           Add Package
         </Button>
       </div>
+
+      <PackageDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        package={selectedPackage}
+        onSave={handleSave}
+      />
 
       <CustomPagination {...pagination} endpoint="/catalogs/packages" />
       <div className="overflow-hidden rounded-md border">
