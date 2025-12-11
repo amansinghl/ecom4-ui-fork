@@ -25,6 +25,11 @@ export function getPageHeaderWithPathName(pathName: string, params: Params) {
   const pathMapping: { [key: string]: string } = {
     shipments: "Shipments",
     "shipments/rto": "RTO Shipments",
+    "quick-ship": "Quick Ship",
+    "dashboard": "Dashboard",
+    "orders/manage-orders": "Manage Orders",
+    "orders/bulk": "Bulk Booking",
+    "catalogs/address-book": "Address Book",
   };
   if (pathMapping?.[pathName]) {
     return pathMapping?.[pathName];
