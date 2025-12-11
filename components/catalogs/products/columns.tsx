@@ -16,7 +16,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 export const columns: ColumnDef<ProductType>[] = [
   {
@@ -157,33 +157,49 @@ export const columns: ColumnDef<ProductType>[] = [
         onDelete?: (product: ProductType) => void;
       };
 
-      const canEdit = !row.original.channel_name || ["Vamaship", "Shopify"].includes(row.original.channel_name);
-      const canDelete = row.original.channel_name !== "Shopify";
+      const isVamaship = row.original.channel_name === "Vamaship";
+      const canEdit = isVamaship;
+      const canDelete = isVamaship;
 
-      const editIconClass = "h-4 w-4 text-blue-600 dark:text-blue-400";
-      const deleteIconClass = canDelete ? "h-4 w-4 text-red-600 dark:text-red-400" : "h-4 w-4 text-muted-foreground";
+      const editIconClass = canEdit
+        ? "h-4 w-4 text-blue-600 dark:text-blue-400"
+        : "h-4 w-4 text-muted-foreground";
+      const deleteIconClass = canDelete
+        ? "h-4 w-4 text-red-600 dark:text-red-400"
+        : "h-4 w-4 text-muted-foreground";
 
       return (
         <div className="flex items-center justify-end gap-1">
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 hover:bg-blue-50 dark:hover:bg-blue-950/30"
-                  onClick={() => {
-                    if (!canEdit) {
-                      toast.error("Kindly edit this product on its associated channel.");
-                      return;
-                    }
-                    meta?.onEdit?.(row.original);
-                  }}
-                >
-                  <Edit className={editIconClass} />
-                </Button>
+                <span>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className={cn(
+                      "h-8 w-8",
+                      canEdit
+                        ? "hover:bg-blue-50 dark:hover:bg-blue-950/30"
+                        : "cursor-not-allowed opacity-50",
+                    )}
+                    disabled={!canEdit}
+                    onClick={() => {
+                      if (!canEdit) {
+                        return;
+                      }
+                      meta?.onEdit?.(row.original);
+                    }}
+                  >
+                    <Edit className={editIconClass} />
+                  </Button>
+                </span>
               </TooltipTrigger>
-              <TooltipContent>Edit</TooltipContent>
+              <TooltipContent>
+                {canEdit
+                  ? "Edit"
+                  : `Edit product on ${row.original.channel_name || "respective"} channel only`}
+              </TooltipContent>
             </Tooltip>
           </TooltipProvider>
           <TooltipProvider>
@@ -193,7 +209,12 @@ export const columns: ColumnDef<ProductType>[] = [
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8 hover:bg-red-50 dark:hover:bg-red-950/30"
+                    className={cn(
+                      "h-8 w-8",
+                      canDelete
+                        ? "hover:bg-red-50 dark:hover:bg-red-950/30"
+                        : "cursor-not-allowed opacity-50",
+                    )}
                     disabled={!canDelete}
                     onClick={() => meta?.onDelete?.(row.original)}
                   >
@@ -201,7 +222,11 @@ export const columns: ColumnDef<ProductType>[] = [
                   </Button>
                 </span>
               </TooltipTrigger>
-              <TooltipContent>{canDelete ? "Delete" : "Delete disabled for Shopify"}</TooltipContent>
+              <TooltipContent>
+                {canDelete
+                  ? "Delete"
+                  : `Delete product on ${row.original.channel_name || "respective"} channel only`}
+              </TooltipContent>
             </Tooltip>
           </TooltipProvider>
         </div>
