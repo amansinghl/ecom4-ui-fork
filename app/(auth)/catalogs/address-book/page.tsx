@@ -5,7 +5,11 @@ import { useLocations } from "@/hooks/use-locations";
 import { type LocationType } from "@/types/locations";
 import { LocationDialog } from "@/components/catalogs/address-book/location-dialog";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Plus, Search } from "lucide-react";
+import { deleteLocation } from "@/api/locations";
+import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import {
   flexRender,
   getCoreRowModel,
@@ -46,6 +50,7 @@ const defaultPagination: PaginationType = {
 export default function AddressBook() {
   const params = useSearchParams();
   const pathname = usePathname();
+  const queryClient = useQueryClient();
   const { data, isLoading, error } = useLocations(
     Object.fromEntries(params.entries()),
   );
@@ -56,18 +61,74 @@ export default function AddressBook() {
   const [selectedLocation, setSelectedLocation] = useState<LocationType | null>(
     null,
   );
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // Filter locations based on search query
+  const filteredLocations = locations.filter((location) => {
+    if (!searchQuery.trim()) return true;
+
+    const query = searchQuery.toLowerCase();
+    
+    // Search across all relevant fields - ensure all are strings
+    const searchableFields = [
+      String(location.location_name || ""),
+      String(location.id || ""),
+      String(location.location_type || ""),
+      String(location.full_name || ""),
+      String(location.email || ""),
+      String(location.contact || ""),
+      String(location.calling_code || ""),
+      String(location.address_line_1 || ""),
+      String(location.address_line_2 || ""),
+      String(location.landmark || ""),
+      String(location.pincode || ""),
+      String(location.city || ""),
+      String(location.state || ""),
+      String(location.country || ""),
+      String(location.channel_name || ""),
+    ];
+
+    // Combine address parts for searching
+    const addressParts = [
+      location.address_line_1,
+      location.address_line_2,
+      location.landmark,
+    ]
+      .filter(Boolean)
+      .map(String)
+      .join(" ");
+
+    const fullAddress = `${addressParts} ${location.city || ""} ${location.state || ""} ${location.pincode || ""} ${location.country || ""}`.toLowerCase();
+
+    // Check if query matches any field
+    return (
+      searchableFields.some((field) => field.toLowerCase().includes(query)) ||
+      fullAddress.includes(query) ||
+      // Also search formatted phone/email
+      (location.contact && `${location.calling_code || ""} ${location.contact}`.toLowerCase().includes(query))
+    );
+  });
 
   const handleEdit = (location: LocationType) => {
     setSelectedLocation(location);
     setDialogOpen(true);
   };
 
-  // TODO
-  const handleDelete = (location: LocationType) => {
+  const handleDelete = async (location: LocationType) => {
     if (
-      confirm(`Are you sure you want to delete "${location.location_name}"?`)
+      !confirm(`Are you sure you want to delete "${location.location_name}"?`)
     ) {
-      console.log("Delete location:", location.id);
+      return;
+    }
+
+    try {
+      await deleteLocation(location as Record<string, any>);
+      toast.success("Location deleted successfully");
+      // Invalidate queries to refetch data
+      await queryClient.invalidateQueries({ queryKey: ["locations"] });
+    } catch (error) {
+      toast.error("Failed to delete location");
+      console.error("Error deleting location:", error);
     }
   };
 
@@ -84,7 +145,7 @@ export default function AddressBook() {
   };
 
   const table = useReactTable({
-    data: locations,
+    data: filteredLocations,
     columns,
     getCoreRowModel: getCoreRowModel(),
     manualPagination: true,
@@ -111,7 +172,7 @@ export default function AddressBook() {
     return <h1>Loading...</h1>;
   }
 
-  const rawPagination = data?.data?.locations ?? defaultPagination;
+  const rawPagination = data?.locations ?? defaultPagination;
   const pagination = decoratePagination(
     rawPagination,
     pathname,
@@ -127,10 +188,21 @@ export default function AddressBook() {
             Manage your address book entries
           </p>
         </div>
-        <Button onClick={handleAdd}>
-          <Plus className="mr-2 size-4" />
-          Add Address
-        </Button>
+        <div className="flex items-center gap-2">
+          <div className="relative w-[300px]">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Search Anything in locations..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9"
+            />
+          </div>
+          <Button onClick={handleAdd}>
+            <Plus className="mr-2 size-4" />
+            Add Address
+          </Button>
+        </div>
       </div>
 
       <LocationDialog

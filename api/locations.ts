@@ -1,15 +1,39 @@
 import { apiClient } from "@/lib/api-client";
-import { LocationsResponseType } from "@/types/locations";
+import { LocationsResponseType, LocationType } from "@/types/locations";
 
 type LocationsApiResponse = {
-  meta: { status_code: number; status: string; message: string };
-  data: { locations: LocationsResponseType };
+  locations: LocationsResponseType;
+};
+
+type UpdateLocationApiResponse = {
+  location: LocationType;
 };
 
 export const getLocations = (params?: Record<string, string>) =>
   apiClient<LocationsApiResponse>("locations", { params });
 
-export type PincodeDetailResponse = {
+export const updateLocation = (
+  locationId: string,
+  data: Partial<LocationType>,
+) =>
+  apiClient<UpdateLocationApiResponse>(`locations/${locationId}`, {
+    method: "PUT",
+    body: data,
+  });
+
+export const createLocation = (data: Record<string, any>) =>
+  apiClient<UpdateLocationApiResponse>("locations", {
+    method: "POST",
+    body: data,
+  });
+
+export const deleteLocation = (locationData: Record<string, any>) =>
+  apiClient<UpdateLocationApiResponse>("locations", {
+    method: "POST",
+    body: { ...locationData, visibility: 0 },
+  });
+
+type PincodeDetailResponse = {
   pincode: string;
   city: string;
   state: string;
@@ -21,4 +45,19 @@ export const getPincodeDetail = (pincode: string) =>
     method: "POST",
     body: { pincode },
   });
+
+type CountryType = {
+  id: number;
+  name: string;
+  isd_code: string;
+  two_digit_code: string;
+  three_digit_code: string;
+  created_at: string;
+  updated_at: string;
+};
+
+type CountriesApiResponse = CountryType[];
+
+export const getCountriesList = () =>
+  apiClient<CountriesApiResponse>("get-countries-list");
 

@@ -28,6 +28,10 @@ import {
 import CustomPagination from "@/components/pagination";
 import { decoratePagination } from "@/decorators/pagination";
 import { PaginationType } from "@/types/shipments";
+import { ProductDialog } from "@/components/catalogs/products/product-dialog";
+import { deleteProduct } from "@/api/products";
+import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 const defaultPagination: PaginationType = {
   first_page_url: null,
@@ -45,6 +49,7 @@ const defaultPagination: PaginationType = {
 export default function Products() {
   const params = useSearchParams();
   const pathname = usePathname();
+  const queryClient = useQueryClient();
   const { data, isLoading, error } = useProducts(
     Object.fromEntries(params.entries()),
   );
@@ -54,24 +59,45 @@ export default function Products() {
   const [selectedProduct, setSelectedProduct] = useState<ProductType | null>(
     null,
   );
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   const handleEdit = (product: ProductType) => {
     setSelectedProduct(product);
-    // TODO: Open edit dialog
-    console.log("Edit product:", product);
+    setDialogOpen(true);
   };
 
-  // TODO
-  const handleDelete = (product: ProductType) => {
-    if (confirm(`Are you sure you want to delete "${product.product_name}"?`)) {
-      console.log("Delete product:", product.id);
+  const handleDelete = async (product: ProductType) => {
+    if (
+      !confirm(
+        `Are you sure you want to delete "${product.product_name}"?`,
+      )
+    ) {
+      return;
+    }
+
+    if (!product.id) {
+      toast.error("Product ID is required");
+      return;
+    }
+
+    try {
+      await deleteProduct(product.id);
+      toast.success("Product deleted successfully");
+      // Invalidate queries to refetch data
+      await queryClient.invalidateQueries({ queryKey: ["products"] });
+    } catch (error) {
+      toast.error("Failed to delete product");
+      console.error("Error deleting product:", error);
     }
   };
 
   const handleAdd = () => {
     setSelectedProduct(null);
-    // TODO: Open add dialog
-    console.log("Add product");
+    setDialogOpen(true);
+  };
+
+  const handleSave = (productData: Partial<ProductType>) => {
+    console.log("Save product:", productData);
   };
 
   const table = useReactTable({
@@ -102,7 +128,7 @@ export default function Products() {
     return <h1>Loading...</h1>;
   }
 
-  const rawPagination = data?.data?.products ?? defaultPagination;
+  const rawPagination = data?.products ?? defaultPagination;
   const pagination = decoratePagination(
     rawPagination,
     pathname,
@@ -123,6 +149,13 @@ export default function Products() {
           Add Product
         </Button>
       </div>
+
+      <ProductDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        product={selectedProduct}
+        onSave={handleSave}
+      />
 
       <CustomPagination {...pagination} endpoint="/catalogs/products" />
       <div className="overflow-hidden rounded-md border">

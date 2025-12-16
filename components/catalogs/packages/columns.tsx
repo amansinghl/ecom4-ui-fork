@@ -10,7 +10,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import {
-  Trash2,
   Edit,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -136,9 +135,13 @@ export const columns: ColumnDef<PackageType>[] = [
   {
     accessorKey: "default_package",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Default" />
+      <DataTableColumnHeader column={column} title="Default Package" />
     ),
-    cell: ({ row }) => {
+    cell: ({ row, table }) => {
+      const meta = table.options.meta as {
+        onMakeDefault?: (pkg: PackageType) => void;
+      };
+      
       const isDefault = row.original.default_package;
       const isDefaultBool = 
         isDefault === true || 
@@ -149,13 +152,16 @@ export const columns: ColumnDef<PackageType>[] = [
       return (
         <div className="text-sm">
           {isDefaultBool ? (
-            <Badge variant="default" className="text-xs">
-              Default
-            </Badge>
+            <span className="text-green-600 dark:text-green-500 font-medium">Default</span>
           ) : (
-            <Badge variant="outline" className="text-xs">
-              No
-            </Badge>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => meta?.onMakeDefault?.(row.original)}
+              className="text-xs"
+            >
+              Make Default
+            </Button>
           )}
         </div>
       );
@@ -168,11 +174,9 @@ export const columns: ColumnDef<PackageType>[] = [
     cell: ({ row, table }) => {
       const meta = table.options.meta as {
         onEdit?: (pkg: PackageType) => void;
-        onDelete?: (pkg: PackageType) => void;
       };
 
       const editIconClass = "h-4 w-4 text-blue-600 dark:text-blue-400";
-      const deleteIconClass = "h-4 w-4 text-red-600 dark:text-red-400";
 
       return (
         <div className="flex items-center justify-end gap-1">
@@ -189,21 +193,6 @@ export const columns: ColumnDef<PackageType>[] = [
                 </Button>
               </TooltipTrigger>
               <TooltipContent>Edit</TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 hover:bg-red-50 dark:hover:bg-red-950/30"
-                  onClick={() => meta?.onDelete?.(row.original)}
-                >
-                  <Trash2 className={deleteIconClass} />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>Delete</TooltipContent>
             </Tooltip>
           </TooltipProvider>
         </div>
