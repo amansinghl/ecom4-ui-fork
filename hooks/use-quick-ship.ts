@@ -262,7 +262,7 @@ export function useQuickShip(defaultBranchId: string) {
       return getQuote(requestData);
     },
     onSuccess: () => {
-      toast.success("Quote generated successfully!");
+      // toast.success("Quote generated successfully!");
     },
     onError: (error: Error) => {
       toast.error(error.message || "Failed to generate quote");
@@ -271,13 +271,10 @@ export function useQuickShip(defaultBranchId: string) {
 
   const onSubmit = form.handleSubmit(
     (data: QuickShipFormData) => {
-      console.log("Form submitted with data:", data);
       const requestData = transformFormDataToRequest(data);
-      console.log("Transformed request data:", requestData);
       mutation.mutate(data);
     },
     (errors) => {
-      console.error("Form validation errors:", errors);
       toast.error("Please fix the form errors before submitting");
     }
   );
@@ -287,6 +284,9 @@ export function useQuickShip(defaultBranchId: string) {
     onSubmit,
     isLoading: mutation.isPending,
     error: mutation.error,
+    quoteData: mutation.data,
+    isQuoteSuccess: mutation.isSuccess,
+    resetQuote: () => mutation.reset(),
   };
 }
 

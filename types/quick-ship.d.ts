@@ -172,9 +172,97 @@ export type QuickShipQuoteRequest = {
   }>;
 };
 
+// Quote Response Types
+export type GSTBreakupItem = {
+  sac: string;
+  taxable: number;
+  gst: string;
+  igst: number;
+  cgst: number;
+  sgst: number;
+  total_gst: number;
+};
+
+export type GSTBreakup = {
+  [chargeHead: string]: GSTBreakupItem;
+};
+
+export type QuoteGST = {
+  gst_breakup: GSTBreakup;
+  total_without_gst: number;
+  total_gst: number;
+  total_cgst: number;
+  total_sgst: number;
+  total_igst: number;
+};
+
+export type ChargeHeads = {
+  freight: number;
+  fuel_surcharge: number;
+  [key: string]: number;
+};
+
+export type QuoteData = {
+  quote: {
+    charge_heads: ChargeHeads;
+    gst: QuoteGST;
+    total_without_tax: number;
+    total_tax: number;
+    total_gst: number;
+    total_cost: number;
+    totalCost: number;
+    zone: string;
+    volumetric_weight: number;
+    actual_weight: number;
+    applied_weight: number;
+    slab_count: number;
+    supplier_id: number;
+    estimated_delivery_date: string;
+    quote_id: string | null;
+  };
+  total_without_tax: number;
+  total_tax: number;
+  total_gst: number;
+  total_cost: number;
+  totalCost: number;
+  zone: string;
+  volumetric_weight: number;
+  actual_weight: number;
+  applied_weight: number;
+  slab_count: number;
+  supplier_id: number;
+  estimated_delivery_date: string;
+  quote_id: string | null;
+};
+
+export type OrderQuote = {
+  [supplierId: string]: QuoteData;
+  other_quotes?: {
+    [supplierId: string]: QuoteData;
+  };
+  quote_id?: string;
+};
+
+export type QuoteResponseData = {
+  orders: OrderQuote[];
+  other_quotes: {
+    [supplierId: string]: QuoteData;
+  };
+  booking_reference_no: string;
+  failed: number[];
+  succeeded: number[];
+  quote_id: number;
+};
+
+export type QuoteResponseMeta = {
+  status_code: number;
+  status: string;
+  message: string;
+};
+
 export type QuickShipQuoteResponse = {
-  // Response structure to be defined based on API response
-  [key: string]: any;
+  data: QuoteResponseData;
+  meta: QuoteResponseMeta;
 };
 
 export type PincodeLookupResult = {
