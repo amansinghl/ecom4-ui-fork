@@ -36,14 +36,14 @@ export default function QuickShip() {
     return branches.find((b) => b.is_default === 1) || branches[0];
   }, [branches]);
   
-  const branchId = defaultBranch?.gst_number || "";
+  const branchId = defaultBranch?.id?.toString() || "";
 
   const { form, onSubmit, isLoading, quoteData, resetQuote } = useQuickShip(branchId);
   const useDifferentReturnAddress = form.watch("useDifferentReturnAddress");
   
   const formattedBranches = useMemo(() => {
     return branches.map((b) => ({
-      id: b.id,
+      id: b.id.toString(),
       name: `${b.branch}${b.gst_number !== "UNKNOWN" ? ` (${b.gst_number})` : ""}`,
       gst_number: b.gst_number,
       is_default: b.is_default === 1,

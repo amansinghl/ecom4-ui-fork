@@ -52,7 +52,7 @@ export function ShipmentPackages({ form }: ShipmentPackagesProps) {
   const handlePackageInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setPackageInputValue(value);
-    setShowPackageDropdown(value.length > 0 && filteredPackages.length > 0);
+    setShowPackageDropdown(filteredPackages.length > 0);
     setFocusedIndex(-1);
   };
 
@@ -162,7 +162,7 @@ export function ShipmentPackages({ form }: ShipmentPackagesProps) {
               value={packageInputValue}
               onChange={handlePackageInputChange}
               onFocus={() => {
-                if (packageInputValue && filteredPackages.length > 0) {
+                if (filteredPackages.length > 0) {
                   setShowPackageDropdown(true);
                 }
               }}
