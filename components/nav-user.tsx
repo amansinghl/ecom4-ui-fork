@@ -9,6 +9,7 @@ import {
 } from "@tabler/icons-react";
 
 import { ChevronDown } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -39,6 +40,7 @@ export function NavUser({
   isLoadedOnHeader?: boolean;
 }) {
   const { isMobile } = useSidebar();
+  const router = useRouter();
 
   const onLogout = async () => {
     const { redirectTo } = await handleLogout();
@@ -108,7 +110,7 @@ export function NavUser({
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={() => router.push("/account")}>
                 <IconUserCircle />
                 Account
               </DropdownMenuItem>
