@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, Suspense } from "react";
 import { useCodTransactions } from "@/hooks/use-cod-transactions";
 import { useCodTransactionsOverall } from "@/hooks/use-cod-transactions-overall";
 import { usePartners } from "@/hooks/use-partners";
@@ -48,12 +48,11 @@ const defaultPagination: PaginationType = {
   total: 1,
 };
 
-export default function Finance() {
+function FinanceContent() {
   const params = useSearchParams();
   const pathname = usePathname();
   const router = useRouter();
   
-  // Get active tab from URL or default to "cod"
   const activeTab = params.get("tabLevel1") || "cod";
   
   const handleTabChange = (value: string) => {
@@ -66,7 +65,6 @@ export default function Finance() {
     router.push(`${pathname}?${newParams.toString()}`);
   };
 
-  // Client-side filter state (not in URL)
   const [filters, setFilters] = useState({
     trackingStatus: "all",
     codStatus: "all",
@@ -79,7 +77,6 @@ export default function Finance() {
     bookingToDate: "",
   });
 
-  // Build queryParams - use filters from state, not URL
   const queryParams = {
     sort: params.get("sort") || "shipment_no|desc",
     page: params.get("page") || "1",
@@ -97,8 +94,6 @@ export default function Finance() {
 
   const { data, isLoading, error, refetch } = useCodTransactions(queryParams);
   
-  // Build filter params for overall API (only tracking_status and cod_status)
-  // Use useMemo to ensure stable reference and proper query key updates
   const overallParams = useMemo(() => {
     const params: Record<string, string> = {};
     if (filters.trackingStatus !== "all") {
@@ -107,7 +102,6 @@ export default function Finance() {
     if (filters.codStatus !== "all") {
       params.cod_status = filters.codStatus;
     }
-    // Return undefined if empty to match API behavior, but this ensures query key changes
     return Object.keys(params).length > 0 ? params : undefined;
   }, [filters.trackingStatus, filters.codStatus]);
   
@@ -120,17 +114,15 @@ export default function Finance() {
   const [rowSelection, setRowSelection] = useState({});
   const [columnVisibility, setColumnVisibility] = useState<ColumnVisibilityConfig>(defaultColumnVisibility);
 
-  // Create all columns
   const allColumns = useMemo(
     () => createColumns(partners),
     [partners],
   );
 
-  // Filter columns based on visibility (always include "select" column)
   const columns = useMemo(() => {
     return allColumns.filter((column) => {
       const columnId = column.id || (column as { accessorKey?: string }).accessorKey;
-      if (columnId === "select") return true; // Always show select column
+      if (columnId === "select") return true;
       if (!columnId) return false;
       return columnVisibility[columnId]?.visibility !== false;
     });
@@ -294,5 +286,13 @@ export default function Finance() {
         </TabsContent>
       </Tabs>
     </div>
+  );
+}
+
+export default function Finance() {
+  return (
+    <Suspense fallback={<h1>Loading...</h1>}>
+      <FinanceContent />
+    </Suspense>
   );
 }

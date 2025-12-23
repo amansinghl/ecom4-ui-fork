@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from "react";
 import { useShipments } from "@/hooks/use-shipments";
 import {
   flexRender,
@@ -33,7 +34,7 @@ const defaultPagination: PaginationType = {
   total: 1,
 };
 
-export default function Shipments() {
+function ShipmentsContent() {
   const params = useSearchParams();
   const pathname = usePathname();
   const { data, isLoading, error } = useShipments(
@@ -117,5 +118,13 @@ export default function Shipments() {
       </div>
       <CustomPagination {...pagination} endpoint="/shipments" />
     </div>
+  );
+}
+
+export default function Shipments() {
+  return (
+    <Suspense fallback={<h1>Loading...</h1>}>
+      <ShipmentsContent />
+    </Suspense>
   );
 }

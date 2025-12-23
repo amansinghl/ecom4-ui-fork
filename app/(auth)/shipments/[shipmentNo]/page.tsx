@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useCompleteShipmentDetails } from "@/hooks/use-shipment-details";
 import ShipmentDetails from "@/components/shipments/shipment/Details";
@@ -11,7 +12,7 @@ import ShipmentTrackingTimeline from "@/components/shipments/shipment/TrackingTi
 import { Button } from "@/components/ui/button";
 import { copyToClipBoard } from "@/lib/client_utils";
 
-export default function BlogPostPage() {
+function BlogPostPageContent() {
   const params = useParams();
   const router = useRouter();
   const queryParams = useSearchParams();
@@ -79,5 +80,13 @@ export default function BlogPostPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function BlogPostPage() {
+  return (
+    <Suspense fallback={<h1>Loading...</h1>}>
+      <BlogPostPageContent />
+    </Suspense>
   );
 }

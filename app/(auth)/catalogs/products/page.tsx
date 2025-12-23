@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { useProducts } from "@/hooks/use-products";
 import { type ProductType } from "@/types/products";
 import { Button } from "@/components/ui/button";
@@ -46,7 +46,7 @@ const defaultPagination: PaginationType = {
   total: 1,
 };
 
-export default function Products() {
+function ProductsContent() {
   const params = useSearchParams();
   const pathname = usePathname();
   const queryClient = useQueryClient();
@@ -83,7 +83,6 @@ export default function Products() {
     try {
       await deleteProduct(product.id);
       toast.success("Product deleted successfully");
-      // Invalidate queries to refetch data
       await queryClient.invalidateQueries({ queryKey: ["products"] });
     } catch (error) {
       toast.error("Failed to delete product");
@@ -194,5 +193,13 @@ export default function Products() {
       </div>
       <CustomPagination {...pagination} endpoint="/catalogs/products" />
     </div>
+  );
+}
+
+export default function Products() {
+  return (
+    <Suspense fallback={<h1>Loading...</h1>}>
+      <ProductsContent />
+    </Suspense>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo, useCallback, useRef } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef, Suspense } from "react";
 import { type DateRange } from "react-day-picker";
 import { useBranches } from "@/hooks/use-user";
 import { useLocations } from "@/hooks/use-locations";
@@ -50,7 +50,7 @@ const defaultPagination: PaginationType = {
 };
 
 
-const ManageOrders = () => {
+const ManageOrdersContent = () => {
   const params = useSearchParams();
   const pathname = usePathname();
   const router = useRouter();
@@ -578,6 +578,14 @@ const ManageOrders = () => {
         }}
       />
     </div>
+  );
+};
+
+const ManageOrders = () => {
+  return (
+    <Suspense fallback={<h1>Loading...</h1>}>
+      <ManageOrdersContent />
+    </Suspense>
   );
 };
 

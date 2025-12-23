@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { usePackages } from "@/hooks/use-packages";
 import { type PackageType } from "@/types/packages";
 import { Button } from "@/components/ui/button";
@@ -46,7 +46,7 @@ const defaultPagination: PaginationType = {
   total: 1,
 };
 
-export default function Packages() {
+function PackagesContent() {
   const params = useSearchParams();
   const pathname = usePathname();
   const queryClient = useQueryClient();
@@ -66,7 +66,6 @@ export default function Packages() {
     setDialogOpen(true);
   };
 
-  // TODO
   const handleDelete = (pkg: PackageType) => {
     if (
       confirm(
@@ -99,7 +98,6 @@ export default function Packages() {
       });
       
       toast.success("Package set as default");
-      // Invalidate queries to refetch data
       await queryClient.invalidateQueries({ queryKey: ["packages"] });
     } catch (error) {
       toast.error("Failed to set package as default");
@@ -206,5 +204,13 @@ export default function Packages() {
       </div>
       <CustomPagination {...pagination} endpoint="/catalogs/packages" />
     </div>
+  );
+}
+
+export default function Packages() {
+  return (
+    <Suspense fallback={<h1>Loading...</h1>}>
+      <PackagesContent />
+    </Suspense>
   );
 }

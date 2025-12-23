@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { useLocations } from "@/hooks/use-locations";
 import { type LocationType } from "@/types/locations";
 import { LocationDialog } from "@/components/catalogs/address-book/location-dialog";
@@ -47,7 +47,7 @@ const defaultPagination: PaginationType = {
   total: 1,
 };
 
-export default function AddressBook() {
+function AddressBookContent() {
   const params = useSearchParams();
   const pathname = usePathname();
   const queryClient = useQueryClient();
@@ -249,5 +249,13 @@ export default function AddressBook() {
       </div>
       <CustomPagination {...pagination} endpoint="/catalogs/address-book" />
     </div>
+  );
+}
+
+export default function AddressBook() {
+  return (
+    <Suspense fallback={<h1>Loading...</h1>}>
+      <AddressBookContent />
+    </Suspense>
   );
 }

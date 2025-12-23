@@ -1,6 +1,6 @@
 import { apiClient } from "@/lib/api-client";
 import { QuickShipQuoteRequest, QuoteResponseData } from "@/types/quick-ship";
-import { OrdersApiResponseType } from "@/types/orders";
+import { OrdersApiResponseType, OrderType } from "@/types/orders";
 
 export const getQuote = (data: QuickShipQuoteRequest) =>
   apiClient<QuoteResponseData>("orders/quote", {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { useWeights } from "@/hooks/use-weights";
 import { type WeightDisputeType } from "@/types/weights";
 import {
@@ -40,11 +40,10 @@ const defaultPagination: PaginationType = {
   total: 1,
 };
 
-export default function Weights() {
+function WeightsContent() {
   const params = useSearchParams();
   const pathname = usePathname();
 
-  // Build queryParams with defaults
   const queryParams = {
     sort: "shipment_no|desc",
     page: "1",
@@ -136,5 +135,13 @@ export default function Weights() {
       </div>
       <CustomPagination {...pagination} endpoint="/weights" />
     </div>
+  );
+}
+
+export default function Weights() {
+  return (
+    <Suspense fallback={<h1>Loading...</h1>}>
+      <WeightsContent />
+    </Suspense>
   );
 }
