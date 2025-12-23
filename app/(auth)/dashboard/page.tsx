@@ -1,14 +1,14 @@
 "use client";
-import { Button } from "@/components/ui/button";
 
-export default function Home() {
+import { SectionCards } from "@/components/dashboard/section-cards";
+import { ShipmentChart } from "@/components/dashboard/shipment-chart";
+
+export default function Dashboard() {
   return (
-    <>
-      <div className="max-w-xs text-3xl font-semibold leading-10 tracking-tight">
-        To get started, edit the page.tsx file.
-        <br />
-        <Button>Hello World!!!</Button>
-      </div>
-    </>
+    <div className="@container/main space-y-6">
+      <SectionCards />
+      <ShipmentChart />
+    </div>
   );
 }
+

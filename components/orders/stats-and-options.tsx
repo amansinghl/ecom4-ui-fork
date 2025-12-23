@@ -21,6 +21,8 @@ import { Plane, Truck, Users, Building2, HelpCircle, Eye, Ship, Package, BarChar
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart";
 import { AreaChart, Area, XAxis } from "recharts";
 import type { LocationType } from "@/types/locations";
+import { useOrderConversionMetrics, useOrderActivityMetrics, useOrderStatsSummary } from "@/hooks/use-order-metrics";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface StatsAndOptionsProps {
   mounted: boolean;
@@ -43,45 +45,23 @@ interface StatsAndOptionsProps {
   formatFullAddress: (location: LocationType) => string;
 }
 
-const ordersChartData = [
-  { month: "Jan", newOrders: 120, converted: 95 },
-  { month: "Feb", newOrders: 150, converted: 120 },
-  { month: "Mar", newOrders: 152, converted: 145 },
-  { month: "Apr", newOrders: 250, converted: 150 },
-  { month: "May", newOrders: 375, converted: 150 },
-  { month: "Jun", newOrders: 490, converted: 160 },
-];
-
-const activityData = [
-  { day: "M", shipments: 12 },
-  { day: "T", shipments: 1 },
-  { day: "W", shipments: 6 },
-  { day: "TH", shipments: 22 },
-  { day: "F", shipments: 8 },
-  { day: "SA", shipments: 14 },
-  { day: "S", shipments: 0 },
-];
-
 const ordersChartConfig: ChartConfig = {
   newOrders: {
     label: "New Orders",
-    color: "hsl(var(--chart-1))",
+    color: "var(--chart-1)",
   },
   converted: {
     label: "Shipment Converted",
-    color: "hsl(var(--chart-2))",
+    color: "var(--chart-2)",
   },
 };
 
 const activityChartConfig: ChartConfig = {
-  shipments: {
+  orders: {
     label: "New Orders Activity",
-    color: "hsl(var(--chart-1))",
+    color: "var(--chart-1)",
   },
 };
-
-const newOrdersCount = 390;
-const convertedCount = 160;
 
 export function StatsAndOptions({
   mounted,
@@ -103,6 +83,15 @@ export function StatsAndOptions({
   formatBranchName,
   formatFullAddress,
 }: StatsAndOptionsProps) {
+  const { data: conversionData, isLoading: conversionLoading } = useOrderConversionMetrics();
+  const { data: activityData, isLoading: activityLoading } = useOrderActivityMetrics();
+  const { data: summaryData, isLoading: summaryLoading } = useOrderStatsSummary();
+
+  const ordersChartData = conversionData?.metrics ?? [];
+  const dailyActivityData = activityData?.metrics ?? [];
+  const newOrdersCount = summaryData?.total_orders ?? 0;
+  const convertedCount = summaryData?.converted_orders ?? 0;
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
       {/* Left: Stat Cards - 60% */}
@@ -116,46 +105,58 @@ export function StatsAndOptions({
                   <Package className="h-4 w-4 text-foreground" />
                   <p className="text-sm font-medium text-foreground">New Orders</p>
                 </div>
-                <p className="text-xl font-bold">{newOrdersCount}</p>
+                <p className="text-xl font-bold">
+                  {summaryLoading ? "..." : newOrdersCount.toLocaleString()}
+                </p>
               </div>
               <div>
                 <div className="flex items-center gap-1.5 mb-1">
                   <Ship className="h-4 w-4 text-foreground" />
                   <p className="text-sm font-medium text-foreground">Shipment Converted</p>
                 </div>
-                <p className="text-xl font-bold">{convertedCount}</p>
+                <p className="text-xl font-bold">
+                  {summaryLoading ? "..." : convertedCount.toLocaleString()}
+                </p>
               </div>
             </div>
             {mounted ? (
-              <ChartContainer config={ordersChartConfig} className="h-[180px] w-full">
-                <AreaChart accessibilityLayer data={ordersChartData} margin={{ top: 2, right: 2, left: 2, bottom: 2 }}>
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                  <XAxis 
-                    dataKey="month" 
-                    tick={{ fontSize: 12, fill: "hsl(var(--foreground))", fontWeight: 500 }}
-                    axisLine={{ stroke: "hsl(var(--border))" }}
-                    tickLine={{ stroke: "hsl(var(--border))" }}
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="newOrders"
-                    stackId="1"
-                    stroke="#8884d8"
-                    fill="#8884d8"
-                    fillOpacity={0.6}
-                    strokeWidth={1.5}
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="converted"
-                    stackId="1"
-                    stroke="#82ca9d"
-                    fill="#82ca9d"
-                    fillOpacity={0.6}
-                    strokeWidth={1.5}
-                  />
-                </AreaChart>
-              </ChartContainer>
+              conversionLoading ? (
+                <Skeleton className="h-[180px] w-full" />
+              ) : ordersChartData.length > 0 ? (
+                <ChartContainer config={ordersChartConfig} className="h-[180px] w-full">
+                  <AreaChart accessibilityLayer data={ordersChartData} margin={{ top: 2, right: 2, left: 2, bottom: 2 }}>
+                    <ChartTooltip content={<ChartTooltipContent />} />
+                    <XAxis 
+                      dataKey="month" 
+                      tick={{ fontSize: 12, fill: "var(--foreground)", fontWeight: 500 }}
+                      axisLine={{ stroke: "var(--border)" }}
+                      tickLine={{ stroke: "var(--border)" }}
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="new_orders"
+                      stackId="1"
+                      stroke="var(--chart-1)"
+                      fill="var(--chart-1)"
+                      fillOpacity={0.6}
+                      strokeWidth={1.5}
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="converted"
+                      stackId="1"
+                      stroke="var(--chart-2)"
+                      fill="var(--chart-2)"
+                      fillOpacity={0.6}
+                      strokeWidth={1.5}
+                    />
+                  </AreaChart>
+                </ChartContainer>
+              ) : (
+                <div className="h-[180px] w-full flex items-center justify-center text-muted-foreground text-sm">
+                  No data available
+                </div>
+              )
             ) : (
               <div className="h-[180px] w-full" />
             )}
@@ -172,25 +173,33 @@ export function StatsAndOptions({
               <BarChart3 className="h-8 w-8 text-muted-foreground opacity-50" />
             </div>
             {mounted ? (
-              <ChartContainer config={activityChartConfig} className="h-[180px] w-full">
-                <AreaChart data={activityData} margin={{ top: 2, right: 2, left: 2, bottom: 2 }}>
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                  <XAxis 
-                    dataKey="day" 
-                    tick={{ fontSize: 12, fill: "hsl(var(--foreground))", fontWeight: 500 }}
-                    axisLine={{ stroke: "hsl(var(--border))" }}
-                    tickLine={{ stroke: "hsl(var(--border))" }}
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="shipments"
-                    stroke="#82ca9d"
-                    fill="#82ca9d"
-                    fillOpacity={0.6}
-                    strokeWidth={1.5}
-                  />
-                </AreaChart>
-              </ChartContainer>
+              activityLoading ? (
+                <Skeleton className="h-[180px] w-full" />
+              ) : dailyActivityData.length > 0 ? (
+                <ChartContainer config={activityChartConfig} className="h-[180px] w-full">
+                  <AreaChart data={dailyActivityData} margin={{ top: 2, right: 2, left: 2, bottom: 2 }}>
+                    <ChartTooltip content={<ChartTooltipContent />} />
+                    <XAxis 
+                      dataKey="day" 
+                      tick={{ fontSize: 12, fill: "var(--foreground)", fontWeight: 500 }}
+                      axisLine={{ stroke: "var(--border)" }}
+                      tickLine={{ stroke: "var(--border)" }}
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="orders"
+                      stroke="var(--chart-1)"
+                      fill="var(--chart-1)"
+                      fillOpacity={0.6}
+                      strokeWidth={1.5}
+                    />
+                  </AreaChart>
+                </ChartContainer>
+              ) : (
+                <div className="h-[180px] w-full flex items-center justify-center text-muted-foreground text-sm">
+                  No data available
+                </div>
+              )
             ) : (
               <div className="h-[180px] w-full" />
             )}

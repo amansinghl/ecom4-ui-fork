@@ -94,3 +94,36 @@ export const updateOrder = (
     body: data,
   });
 
+export type MonthlyConversionMetric = {
+  month: string;
+  new_orders: number;
+  converted: number;
+};
+
+export type DailyActivityMetric = {
+  day: string;
+  orders: number;
+};
+
+export type OrderStatsSummary = {
+  total_orders: number;
+  converted_orders: number;
+};
+
+type OrderConversionMetricsResponse = {
+  metrics: MonthlyConversionMetric[];
+};
+
+type OrderActivityMetricsResponse = {
+  metrics: DailyActivityMetric[];
+};
+
+export const getOrderConversionMetrics = () =>
+  apiClient<OrderConversionMetricsResponse>("orders/metrics/conversion");
+
+export const getOrderActivityMetrics = () =>
+  apiClient<OrderActivityMetricsResponse>("orders/metrics/activity");
+
+export const getOrderStatsSummary = () =>
+  apiClient<OrderStatsSummary>("orders/metrics/summary");
+
