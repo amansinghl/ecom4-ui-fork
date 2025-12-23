@@ -17,6 +17,8 @@ export type CodTransactionType = {
   cod_aging: number;
   pending_since: string | null;
   cod_status: string;
+  partner_name?: string | null;
+  partner_logo?: string | null;
 };
 
 export type CodTransactionsType = CodTransactionType[];
@@ -32,5 +34,24 @@ export type CodTransactionsResponseType = {
 export type CodTransactionsApiData = {
   cod_adjustable: number;
   cod_transactions: CodTransactionsResponseType;
+};
+
+export type CodSnapshotItem = {
+  total_shipments: number;
+  total_cod: string;
+  picked_up: boolean;
+};
+
+export type CodTransactionsOverallResponse = {
+  total_shipments: CodSnapshotItem;
+  cod_pickup_shipment: CodSnapshotItem;
+  pending: CodSnapshotItem;
+  initiated: CodSnapshotItem;
+  cod_remitted: CodSnapshotItem;
+  cod_not_eligible: CodSnapshotItem;
+};
+
+export type CodTransactionsOverallApiData = {
+  response: CodTransactionsOverallResponse;
 };
 

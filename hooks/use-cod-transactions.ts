@@ -8,6 +8,7 @@ export function useCodTransactions(params?: Record<string, string>) {
     queryKey: ["cod-transactions", params],
     queryFn: () => getCodTransactions(params),
     placeholderData: (previousData) => previousData,
+    enabled: params !== undefined, // Only fetch when params are provided
   });
 }
 
