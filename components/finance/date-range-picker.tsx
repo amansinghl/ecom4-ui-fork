@@ -1,13 +1,12 @@
 "use client";
 
 import * as React from "react";
-import { format, parse } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { type DateRange } from "react-day-picker";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Calendar05 } from "@/components/customized/date-range-calendar";
+import { Calendar } from "@/components/ui/calendar";
 import {
   Popover,
   PopoverContent,
@@ -22,6 +21,16 @@ type DateRangePickerProps = {
   startPlaceholder: string;
   endPlaceholder: string;
   id?: string;
+};
+
+// Format date for display: MMM DD, YYYY (e.g., "Nov 23, 2025")
+const formatDate = (date: Date | undefined): string => {
+  if (!date) return "";
+  return date.toLocaleDateString("en-US", { 
+    month: "short", 
+    day: "numeric", 
+    year: "numeric" 
+  });
 };
 
 export function DateRangePicker({
@@ -39,7 +48,12 @@ export function DateRangePicker({
   const parseDate = React.useCallback((dateStr: string): Date | undefined => {
     if (!dateStr) return undefined;
     try {
-      return parse(dateStr, "yyyy-MM-dd", new Date());
+      // Try parsing yyyy-MM-dd format
+      const parts = dateStr.split("-");
+      if (parts.length === 3) {
+        return new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+      }
+      return new Date(dateStr);
     } catch {
       return undefined;
     }
@@ -68,7 +82,7 @@ export function DateRangePicker({
     
     // Update from date if it exists
     if (range.from) {
-      const fromDateStr = format(range.from, "yyyy-MM-dd");
+      const fromDateStr = range.from.toISOString().split("T")[0];
       onFromDateChange(fromDateStr);
     } else {
       onFromDateChange("");
@@ -76,19 +90,11 @@ export function DateRangePicker({
     
     // Update to date if it exists
     if (range.to) {
-      const toDateStr = format(range.to, "yyyy-MM-dd");
+      const toDateStr = range.to.toISOString().split("T")[0];
       onToDateChange(toDateStr);
-      // Close popover when both dates are selected
-      setOpen(false);
     } else {
-      // If only from date is selected, clear to date but keep calendar open
       onToDateChange("");
     }
-  };
-
-  // Format date for display: dd-MMM-yyyy (e.g., "01-Dec-2025")
-  const formatDisplayDate = (date: Date) => {
-    return format(date, "dd-MMM-yyyy");
   };
 
   // Determine which month to show first in the calendar
@@ -100,14 +106,14 @@ export function DateRangePicker({
 
   // Display text for the button
   const displayText = React.useMemo(() => {
-    if (fromDateObj && toDateObj) {
-      return `${formatDisplayDate(fromDateObj)} - ${formatDisplayDate(toDateObj)}`;
+    if (dateRange?.from && dateRange?.to) {
+      return `${formatDate(dateRange.from)} - ${formatDate(dateRange.to)}`;
     }
-    if (fromDateObj) {
-      return formatDisplayDate(fromDateObj);
+    if (dateRange?.from) {
+      return `${formatDate(dateRange.from)} - ...`;
     }
     return "";
-  }, [fromDateObj, toDateObj]);
+  }, [dateRange]);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -117,29 +123,45 @@ export function DateRangePicker({
           variant="outline"
           size="sm"
           className={cn(
-            "w-full justify-start text-left font-normal h-9 text-sm min-w-[240px] max-w-[280px]",
+            "w-full justify-start text-left font-normal h-9 text-sm min-w-[240px] max-w-[280px] gap-2",
             "bg-background hover:bg-accent/50 transition-colors",
             "border-input shadow-sm",
-            !fromDateObj && !toDateObj && "text-muted-foreground",
-            fromDateObj && toDateObj && "text-foreground font-medium"
+            !dateRange && "text-muted-foreground"
           )}
         >
-          <CalendarIcon className="mr-2 h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+          <CalendarIcon className="h-4 w-4 shrink-0 text-muted-foreground" />
           <span className="truncate text-sm">
             {displayText || (
               <span className="text-muted-foreground font-normal">
-                {startPlaceholder} - {endPlaceholder}
+                from Date - to Date
               </span>
             )}
           </span>
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="start">
-        <Calendar05
-          dateRange={dateRange}
-          onSelect={handleRangeSelect}
+        <Calendar
+          mode="range"
           defaultMonth={defaultMonth}
+          selected={dateRange}
+          onSelect={handleRangeSelect}
+          numberOfMonths={2}
+          className="rounded-lg border shadow-sm"
         />
+        {dateRange && (
+          <div className="p-3 border-t">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                handleRangeSelect(undefined);
+              }}
+              className="h-8 w-full text-sm"
+            >
+              Clear
+            </Button>
+          </div>
+        )}
       </PopoverContent>
     </Popover>
   );
