@@ -7,7 +7,7 @@ import { type DateRange } from "react-day-picker";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
+import { Calendar05 } from "@/components/customized/date-range-calendar";
 import {
   Popover,
   PopoverContent,
@@ -135,13 +135,10 @@ export function DateRangePicker({
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0" align="start">
-        <Calendar
-          mode="range"
-          defaultMonth={defaultMonth}
-          selected={dateRange}
+        <Calendar05
+          dateRange={dateRange}
           onSelect={handleRangeSelect}
-          numberOfMonths={2}
-          className="rounded-lg border shadow-sm"
+          defaultMonth={defaultMonth}
         />
       </PopoverContent>
     </Popover>
