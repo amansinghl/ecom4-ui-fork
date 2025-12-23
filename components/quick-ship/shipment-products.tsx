@@ -69,16 +69,35 @@ export function ShipmentProducts({ form, branches = [] }: ShipmentProductsProps)
     const value = e.target.value;
     setProductInputValues((prev) => ({ ...prev, [index]: value }));
     form.setValue(`products.${index}.product_name`, value);
+    const filtered = getFilteredProducts(index);
     setShowProductDropdowns((prev) => ({
       ...prev,
-      [index]: value.length > 0 && getFilteredProducts(index).length > 0,
+      [index]: filtered.length > 0,
     }));
     setFocusedIndices((prev) => ({ ...prev, [index]: -1 }));
   };
 
-  const handleProductSelect = (index: number, productName: string) => {
+  const handleProductSelect = (index: number, product: any) => {
+    const productName = product.product_name || "";
     setProductInputValues((prev) => ({ ...prev, [index]: productName }));
     form.setValue(`products.${index}.product_name`, productName);
+    
+    const weight = product.weight_in_kgs ?? product.weight;
+    if (weight !== null && weight !== undefined) {
+      const weightNum = typeof weight === "string" ? parseFloat(weight) : weight;
+      if (!isNaN(weightNum) && weightNum > 0) {
+        form.setValue(`products.${index}.product_weight`, weightNum);
+      }
+    }
+    
+    const price = product.price;
+    if (price !== null && price !== undefined) {
+      const priceNum = typeof price === "string" ? parseFloat(price) : price;
+      if (!isNaN(priceNum) && priceNum >= 0) {
+        form.setValue(`products.${index}.product_value`, priceNum);
+      }
+    }
+    
     setShowProductDropdowns((prev) => ({ ...prev, [index]: false }));
     setFocusedIndices((prev) => ({ ...prev, [index]: -1 }));
     inputRefs.current[index]?.blur();
@@ -103,7 +122,7 @@ export function ShipmentProducts({ form, branches = [] }: ShipmentProductsProps)
     } else if (e.key === "Enter" && (focusedIndices[index] ?? -1) >= 0) {
       e.preventDefault();
       const focusedIndex = focusedIndices[index] ?? -1;
-      handleProductSelect(index, filteredProducts[focusedIndex].product_name || "");
+      handleProductSelect(index, filteredProducts[focusedIndex]);
     } else if (e.key === "Escape") {
       setShowProductDropdowns((prev) => ({ ...prev, [index]: false }));
       setFocusedIndices((prev) => ({ ...prev, [index]: -1 }));
@@ -134,8 +153,8 @@ export function ShipmentProducts({ form, branches = [] }: ShipmentProductsProps)
   const handleAddProduct = () => {
     append({
       product_name: "",
-      product_weight: 0.01,
-      product_value: 0,
+      product_weight: undefined,
+      product_value: undefined,
       quantity: 1,
     });
     const newIndex = fields.length;
@@ -372,7 +391,7 @@ export function ShipmentProducts({ form, branches = [] }: ShipmentProductsProps)
                     value={productInputValue}
                     onChange={(e) => handleInputChange(index, e)}
                     onFocus={() => {
-                      if (productInputValue && filteredProducts.length > 0) {
+                      if (filteredProducts.length > 0) {
                         setShowProductDropdowns((prev) => ({ ...prev, [index]: true }));
                       }
                     }}
@@ -400,7 +419,7 @@ export function ShipmentProducts({ form, branches = [] }: ShipmentProductsProps)
                               prodIndex === focusedIndex ? "bg-accent" : ""
                             }`}
                             onClick={() =>
-                              handleProductSelect(index, product.product_name || "")
+                              handleProductSelect(index, product)
                             }
                             onMouseEnter={() =>
                               setFocusedIndices((prev) => ({ ...prev, [index]: prodIndex }))
@@ -439,20 +458,30 @@ export function ShipmentProducts({ form, branches = [] }: ShipmentProductsProps)
                     id={`product_weight_${index}`}
                     type="text"
                     inputMode="decimal"
-                    placeholder="0.01"
-                    {...form.register(`products.${index}.product_weight`, {
-                      setValueAs: (value) => {
+                    placeholder="Enter weight in KG"
+                    value={form.watch(`products.${index}.product_weight`) ?? ""}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      if (value === "" || value.trim() === "") {
+                        form.setValue(`products.${index}.product_weight`, undefined, { shouldValidate: false });
+                      } else {
                         const num = parseFloat(value);
-                        return isNaN(num) ? undefined : num;
-                      },
-                    })}
+                        if (!isNaN(num)) {
+                          form.setValue(`products.${index}.product_weight`, num, { shouldValidate: false });
+                        }
+                      }
+                    }}
                     onBlur={(e) => {
                       const value = e.target.value;
-                      if (value) {
+                      if (value && value.trim() !== "") {
                         const num = parseFloat(value);
-                        if (!isNaN(num) && num >= 0.01) {
+                        if (!isNaN(num) && num > 0) {
                           form.setValue(`products.${index}.product_weight`, num);
+                        } else {
+                          form.setValue(`products.${index}.product_weight`, undefined);
                         }
+                      } else {
+                        form.setValue(`products.${index}.product_weight`, undefined);
                       }
                     }}
                     aria-invalid={
@@ -488,21 +517,31 @@ export function ShipmentProducts({ form, branches = [] }: ShipmentProductsProps)
                       id={`product_value_${index}`}
                       type="text"
                       inputMode="decimal"
-                      placeholder="0"
+                      placeholder="Enter value in ₹"
                       className="pl-8"
-                      {...form.register(`products.${index}.product_value`, {
-                        setValueAs: (value) => {
+                      value={form.watch(`products.${index}.product_value`) ?? ""}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        if (value === "" || value.trim() === "") {
+                          form.setValue(`products.${index}.product_value`, undefined, { shouldValidate: false });
+                        } else {
                           const num = parseFloat(value);
-                          return isNaN(num) ? undefined : num;
-                        },
-                      })}
+                          if (!isNaN(num)) {
+                            form.setValue(`products.${index}.product_value`, num, { shouldValidate: false });
+                          }
+                        }
+                      }}
                       onBlur={(e) => {
                         const value = e.target.value;
-                        if (value) {
+                        if (value && value.trim() !== "") {
                           const num = parseFloat(value);
                           if (!isNaN(num) && num >= 0) {
                             form.setValue(`products.${index}.product_value`, num);
+                          } else {
+                            form.setValue(`products.${index}.product_value`, undefined);
                           }
+                        } else {
+                          form.setValue(`products.${index}.product_value`, undefined);
                         }
                       }}
                       aria-invalid={

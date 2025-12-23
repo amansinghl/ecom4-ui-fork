@@ -63,30 +63,35 @@ export type QuickShipQuoteRequest = {
       country: string;
     };
     destination_address: {
-      location_id: string;
-      full_name: string;
-      email: string;
-      calling_code: string;
-      contact: string;
-      pincode: string;
-      address_line_1: string;
-      address_line_2: string;
-      city: string;
-      state: string;
-      country: string;
+      location_id?: number | string;
+      consignee_name?: string;
+      consignee_contact?: string;
+      consignee_email?: string;
+      // Full address format (for backward compatibility)
+      full_name?: string;
+      email?: string;
+      calling_code?: string;
+      contact?: string;
+      pincode?: string;
+      address_line_1?: string;
+      address_line_2?: string;
+      city?: string;
+      state?: string;
+      country?: string;
     };
     billing_address: {
-      location_id: string;
-      full_name: string;
-      email: string;
-      calling_code: string;
-      contact: string;
-      pincode: string;
-      address_line_1: string;
-      address_line_2: string;
-      city: string;
-      state: string;
-      country: string;
+      location_id: number | string;
+      // Full address format (for backward compatibility)
+      full_name?: string;
+      email?: string;
+      calling_code?: string;
+      contact?: string;
+      pincode?: string;
+      address_line_1?: string;
+      address_line_2?: string;
+      city?: string;
+      state?: string;
+      country?: string;
     };
     return_address: {
       location_id: string;
@@ -102,6 +107,7 @@ export type QuickShipQuoteRequest = {
       country: string;
     };
     shipment: {
+      order_id?: number;
       vamaship_product_code: string;
       shipment_type: string;
       mode_transport: string;
@@ -109,6 +115,7 @@ export type QuickShipQuoteRequest = {
       service_type: string;
       special_shipment_type: string | null;
       weight_type: string;
+      product_value?: string | number;
       reference1: string | null;
       reference2: string | null;
       is_cod: boolean;
@@ -116,19 +123,21 @@ export type QuickShipQuoteRequest = {
       requested_pickup_date: string;
       couponCode: boolean;
       products: Array<{
-        customer_product_id: string | null;
-        product_name: string;
-        quantity: string;
-        weight: number;
-        weight_unit: string;
-        product_value_with_tax: number;
-        product_value_without_tax: number;
-        product_tax_amount: number | null;
-        product_value_currency: string;
-        hsn_code: string | null;
-        custom_fields: Record<string, any> | null;
-        channel_name: string;
-        additional_product_details: {
+        item_id?: number;
+        // Full product format (for backward compatibility)
+        customer_product_id?: string | null;
+        product_name?: string;
+        quantity?: string;
+        weight?: number;
+        weight_unit?: string;
+        product_value_with_tax?: number;
+        product_value_without_tax?: number;
+        product_tax_amount?: number | null;
+        product_value_currency?: string;
+        hsn_code?: string | null;
+        custom_fields?: Record<string, any> | null;
+        channel_name?: string;
+        additional_product_details?: {
           color: string;
           return_reason: string;
           brand: string;
@@ -145,15 +154,15 @@ export type QuickShipQuoteRequest = {
         weight_unit: string;
         number_of_packages: number;
         dimensions: {
-          height: string;
-          breadth: string;
-          length: string;
+          height: number | string;
+          breadth: number | string;
+          length: number | string;
           dimensions_unit: string;
         };
       }>;
       value_added_services: {
         cod: {
-          value: number;
+          value: number | string;
           currency: string;
           payment_mode: string;
         };
@@ -172,9 +181,97 @@ export type QuickShipQuoteRequest = {
   }>;
 };
 
+// Quote Response Types
+export type GSTBreakupItem = {
+  sac: string;
+  taxable: number;
+  gst: string;
+  igst: number;
+  cgst: number;
+  sgst: number;
+  total_gst: number;
+};
+
+export type GSTBreakup = {
+  [chargeHead: string]: GSTBreakupItem;
+};
+
+export type QuoteGST = {
+  gst_breakup: GSTBreakup;
+  total_without_gst: number;
+  total_gst: number;
+  total_cgst: number;
+  total_sgst: number;
+  total_igst: number;
+};
+
+export type ChargeHeads = {
+  freight: number;
+  fuel_surcharge: number;
+  [key: string]: number;
+};
+
+export type QuoteData = {
+  quote: {
+    charge_heads: ChargeHeads;
+    gst: QuoteGST;
+    total_without_tax: number;
+    total_tax: number;
+    total_gst: number;
+    total_cost: number;
+    totalCost: number;
+    zone: string;
+    volumetric_weight: number;
+    actual_weight: number;
+    applied_weight: number;
+    slab_count: number;
+    supplier_id: number;
+    estimated_delivery_date: string;
+    quote_id: string | null;
+  };
+  total_without_tax: number;
+  total_tax: number;
+  total_gst: number;
+  total_cost: number;
+  totalCost: number;
+  zone: string;
+  volumetric_weight: number;
+  actual_weight: number;
+  applied_weight: number;
+  slab_count: number;
+  supplier_id: number;
+  estimated_delivery_date: string;
+  quote_id: string | null;
+};
+
+export type OrderQuote = {
+  [supplierId: string]: QuoteData;
+  other_quotes?: {
+    [supplierId: string]: QuoteData;
+  };
+  quote_id?: string;
+};
+
+export type QuoteResponseData = {
+  orders: OrderQuote[];
+  other_quotes: {
+    [supplierId: string]: QuoteData;
+  };
+  booking_reference_no: string;
+  failed: number[];
+  succeeded: number[];
+  quote_id: number;
+};
+
+export type QuoteResponseMeta = {
+  status_code: number;
+  status: string;
+  message: string;
+};
+
 export type QuickShipQuoteResponse = {
-  // Response structure to be defined based on API response
-  [key: string]: any;
+  data: QuoteResponseData;
+  meta: QuoteResponseMeta;
 };
 
 export type PincodeLookupResult = {

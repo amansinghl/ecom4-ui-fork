@@ -1,3 +1,38 @@
+export type BranchType = {
+  id: number;
+  entity_id: number;
+  registered: number;
+  phone_verified: number;
+  gst_number: string;
+  is_default: number;
+  pincode: string;
+  state_name: string;
+  state_code: string;
+  state_id: number | null;
+  branch: string;
+  unit_type: string;
+  address1: string | null;
+  address2: string | null;
+  city: string;
+  city_id: number | null;
+  created_at: string;
+  updated_at: string | null;
+  deleted_at: string | null;
+  deactivated_at: string | null;
+};
+
+export type BankType = {
+  id: number;
+  entity_id: number;
+  beneficiary_name: string;
+  account_number: string;
+  bank_name: string;
+  ifsc_code: string;
+  is_default: number;
+  created_at: string;
+  updated_at: string;
+};
+
 export type UserType = {
   id: number;
   first_name: string;
@@ -40,6 +75,8 @@ export type UserType = {
     credit_balance: string;
     cod_adjustable: number;
   };
+  branches?: BranchType[];
+  banks?: BankType[];
   is_admin: boolean;
   role_id: number;
   is_duplicate_pan: boolean;

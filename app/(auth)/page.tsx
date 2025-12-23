@@ -1,12 +1,15 @@
 "use client";
-import { Button } from "@/components/ui/button";
+
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
-  return (
-    <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight">
-      To get started, edit the page.tsx file.
-      <br />
-      <Button>Hello World</Button>
-    </h1>
-  );
+  const router = useRouter();
+
+  // Redirect / to /dashboard as default
+  useEffect(() => {
+    router.replace("/dashboard");
+  }, [router]);
+
+  return null;
 }

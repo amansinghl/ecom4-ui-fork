@@ -7,6 +7,10 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "ecom.vamaship.com",
       },
+      {
+        protocol: "https",
+        hostname: "vs-storage-test1.s3.amazonaws.com",
+      },
     ],
   },
 };

@@ -8,6 +8,7 @@ import { ShipmentAddress } from "@/components/quick-ship/shipment-address";
 import { ReturnAddress } from "@/components/quick-ship/return-address";
 import { ShipmentProducts } from "@/components/quick-ship/shipment-products";
 import { ShipmentPackages } from "@/components/quick-ship/shipment-packages";
+import { QuoteDisplay } from "@/components/quick-ship/quote-display";
 import {
   Card,
   CardContent,
@@ -15,7 +16,16 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Loader2, Package, MapPin, ShoppingCart, Box, ArrowRight } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogAction,
+} from "@/components/ui/alert-dialog";
+import { Loader2, Package, MapPin, ShoppingCart, Box, ArrowRight, XCircle } from "lucide-react";
 
 export default function QuickShip() {
   const { data: branchesData, isLoading: branchesLoading } = useBranches();
@@ -26,28 +36,42 @@ export default function QuickShip() {
     return branches.find((b) => b.is_default === 1) || branches[0];
   }, [branches]);
   
-  const branchId = defaultBranch?.gst_number || "";
+  const branchId = defaultBranch?.id?.toString() || "";
 
-  const { form, onSubmit, isLoading } = useQuickShip(branchId);
+  const { form, onSubmit, isLoading, quoteData, resetQuote } = useQuickShip(branchId);
   const useDifferentReturnAddress = form.watch("useDifferentReturnAddress");
   
   const formattedBranches = useMemo(() => {
     return branches.map((b) => ({
-      id: b.id,
+      id: b.id.toString(),
       name: `${b.branch}${b.gst_number !== "UNKNOWN" ? ` (${b.gst_number})` : ""}`,
       gst_number: b.gst_number,
       is_default: b.is_default === 1,
     }));
   }, [branches]);
 
+  const handleBackToForm = () => {
+    resetQuote?.();
+  };
+
+  const hasFailedQuotes = quoteData?.failed && quoteData.failed.length > 0;
+
+  if (quoteData?.orders && quoteData.orders.length > 0) {
+    return (
+      <div className="min-h-[calc(100vh-8rem)] py-6">
+        <QuoteDisplay quoteData={quoteData} onBackToForm={handleBackToForm} />
+      </div>
+    );
+  }
+
   return (
-    <div className="h-[calc(100vh-8rem)] flex flex-col">
-      
-      <form
-        id="quick-ship-form"
-        onSubmit={onSubmit}
-        className="flex-1 overflow-hidden"
-      >
+    <>
+      <div className="h-[calc(100vh-8rem)] flex flex-col">
+        <form
+          id="quick-ship-form"
+          onSubmit={onSubmit}
+          className="flex-1 overflow-hidden"
+        >
         <div className="h-full grid grid-cols-12 gap-4">
           <div className="col-span-12 lg:col-span-4 flex flex-col gap-4 overflow-y-auto pr-2">
             <Card className="border-2 shadow-lg">
@@ -143,10 +167,6 @@ export default function QuickShip() {
                 type="submit"
                 disabled={isLoading}
                 className="px-8 py-6 text-sm font-medium rounded-lg shadow-sm hover:shadow-md transition-all"
-                onClick={(e) => {
-                  console.log("Button clicked, form errors:", form.formState.errors);
-                  console.log("Form values:", form.getValues());
-                }}
               >
                 {isLoading ? (
                   <>
@@ -165,5 +185,35 @@ export default function QuickShip() {
         </div>
       </form>
     </div>
+
+    {hasFailedQuotes && (
+      <AlertDialog open={true} onOpenChange={(open) => {
+        if (!open) {
+          handleBackToForm();
+        }
+      }}>
+        <AlertDialogContent className="sm:max-w-md">
+          <AlertDialogHeader>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/20">
+                <XCircle className="h-6 w-6 text-red-600 dark:text-red-400" />
+              </div>
+              <AlertDialogTitle className="text-red-600 dark:text-red-400 text-xl">
+                This Order Cannot Be Fulfilled
+              </AlertDialogTitle>
+            </div>
+            <AlertDialogDescription className="text-base pt-2">
+              No Supplier can fulfill this Order. Please review your shipment details and try again.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={handleBackToForm} className="w-full sm:w-auto">
+              Close
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    )}
+  </>
   );
 }
